@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              android:padding="5dp"
+              android:orientation="vertical"
+    >
+
+
+    <TextView
+        android:id="@+id/rank_text"
+        android:layout_width="112dp"
+        android:layout_height="60dp"
+        android:textSize="50sp"
+        android:text="1"
+        android:gravity="center_vertical|center_horizontal"
+        android:layout_gravity="center">
+    </TextView>
+
+    <ImageView
+        android:id="@+id/grid_image"
+        android:layout_width="112dp"
+        android:layout_height="41dp"
+        android:src="@drawable/stars_none">
+    </ImageView>
+</LinearLayout>

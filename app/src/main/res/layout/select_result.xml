@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:orientation="vertical"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Please Select the stars you took on your attack"
+        android:id="@+id/textView3"
+        android:layout_gravity="center_horizontal"
+        android:textIsSelectable="false"
+        android:textSize="@dimen/abc_text_size_medium_material"
+        android:textStyle="bold"
+        android:layout_marginTop="20dp"
+        android:layout_marginBottom="20dp"/>
+
+    <GridView
+        android:id="@+id/selectResultGridView"
+        android:layout_width="wrap_content"
+        android:layout_height="100dp"
+        android:columnWidth="100dp"
+        android:numColumns="5"
+        android:stretchMode="columnWidth"
+        android:gravity="center"
+        android:layout_gravity="center_horizontal">
+    </GridView>
+
+</LinearLayout>

@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+          package="biz.no_ip.danie_dutoit.clashofclans">
+    <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
+
+    <application
+            android:allowBackup="true"
+            android:icon="@mipmap/icon"
+            android:label="@string/app_name"
+            android:name=".GlobalState"
+            android:theme="@style/CustomTheme">
+        <activity
+                android:screenOrientation="landscape"
+                android:configChanges="orientation|keyboardHidden"
+                android:name=".MainActivity"
+                android:label="@string/app_name">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+        </activity>
+        <activity
+                android:screenOrientation="landscape"
+                android:configChanges="orientation|keyboardHidden"
+                android:name=".SelectionActivity"
+                android:label="@string/app_name">
+                <!--android:screenOrientation="sensor"-->
+            <intent-filter>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <action android:name="android.intent.action.SelectionActivity"/>
+            </intent-filter>
+        </activity>
+        <activity
+                android:screenOrientation="landscape"
+                android:configChanges="orientation|keyboardHidden"
+                android:name=".SelectResultActivity"
+                android:label="@string/app_name">
+                <!--android:screenOrientation="sensor"-->
+            <intent-filter>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <action android:name="android.intent.action.SelectResultActivity"/>
+            </intent-filter>
+        </activity>
+        <activity
+                android:screenOrientation="landscape"
+                android:configChanges="orientation|keyboardHidden"
+                android:name=".WarProgressActivity"
+                android:label="@string/app_name">
+            <!--android:screenOrientation="sensor"-->
+            <intent-filter>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <action android:name="android.intent.action.WarProgressActivity"/>
+            </intent-filter>
+        </activity>
+        <activity
+                android:screenOrientation="landscape"
+                android:configChanges="orientation|keyboardHidden"
+                android:name=".UsVsThemActivity"
+                android:label="@string/app_name">
+            <!--android:screenOrientation="sensor"-->
+            <intent-filter>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <action android:name="android.intent.action.UsVsThemActivity"/>
+            </intent-filter>
+        </activity>
+        <activity
+                android:screenOrientation="landscape"
+                android:configChanges="orientation|keyboardHidden"
+                android:name=".StarsLeftToBeWinActivity"
+                android:label="@string/app_name">
+            <!--android:screenOrientation="sensor"-->
+            <intent-filter>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <action android:name="android.intent.action.StarsLeftToBeWinActivity"/>
+            </intent-filter>
+        </activity>
+    </application>
+</manifest>

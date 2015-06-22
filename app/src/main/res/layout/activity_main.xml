@@ -1,0 +1,31 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:layout_width="fill_parent"
+              android:layout_height="fill_parent" android:orientation="vertical" android:weightSum="1">
+
+    <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Please select the War"
+            android:id="@+id/textView" android:textSize="@dimen/abc_text_size_title_material"/>
+    <Spinner
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/selectWarSpinner" android:spinnerMode="dropdown"/>
+    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+              android:text="Please select your Game Name" android:id="@+id/textView2"
+              android:textSize="@dimen/abc_text_size_title_material"/>
+    <Spinner android:layout_width="fill_parent" android:layout_height="wrap_content" android:id="@+id/gameNameSpinner"
+             android:spinnerMode="dropdown"/>
+    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+              android:text="Recommended Next Attacker/s " android:id="@+id/textView4"
+              android:textSize="@dimen/abc_text_size_title_material"/>
+    <ListView
+            android:layout_width="match_parent"
+            android:layout_height="72dp"
+            android:id="@+id/nextAttackersListView" android:layout_weight="0.33" android:choiceMode="none"/>
+    <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Submit"
+            android:id="@+id/submit" android:layout_gravity="center_horizontal"/>
+</LinearLayout>

@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="custom_input_color">#ffbe9562</color>
+    <color name="gradientStart_color">#ffbe9562</color>
+    <color name="gradientEnd_color">#fff2c08f</color>
+    <color name="custom_bg_color">#ffe4e5e7</color>
+    <color name="custom_txt_color">#ff222152</color>
+    <color name="custom_hl_color">#ff222152</color>
+
+    <style name="Divider">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">2px</item>
+        <item name="android:background">@color/custom_bg_color</item>
+    </style>
+
+    <style name="CustomTheme" parent="android:Theme.Holo.Light">
+        <item name="android:windowBackground">@color/custom_bg_color</item>
+        <item name="android:colorBackground">@color/custom_bg_color</item>
+        <item name="android:textColor">@color/custom_txt_color</item>
+    </style>
+
+    <style name="H1">
+        <item name="android:textColor">@color/custom_hl_color</item>
+        <item name="android:textSize">01sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+    </style>
+
+    <style name="H2">
+        <item name="android:textColor">@color/custom_hl_color</item>
+        <item name="android:textSize">16sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+    </style>
+
+    <style name="txtOut">
+        <item name="android:textColor">@color/custom_txt_color</item>
+        <item name="android:textSize">14sp</item>
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+    </style>
+
+    <style name="input_field">
+        <item name="android:textColor">@color/custom_input_color</item>
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:textSize">16sp</item>
+    </style>
+
+    <style name="errorView">
+        <item name="android:layout_width">fill_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:height">40dip</item>
+        <item name="android:layout_marginLeft">15dip</item>
+        <item name="android:layout_marginRight">9dip</item>
+        <item name="android:layout_marginTop">15dip</item>
+        <item name="android:textColor">#AA0000</item>
+        <item name="android:textSize">14sp</item>
+    </style>
+
+    <style name="button">
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_gravity">center_horizontal</item>
+        <item name="android:layout_marginTop">10dp</item>
+        <item name="android:textColor">@android:color/white</item>
+        <item name="android:textSize">20sp</item>
+    </style>
+</resources>
+
