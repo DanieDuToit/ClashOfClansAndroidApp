@@ -86,6 +86,9 @@ public class StarsLeftToBeWinActivity extends Activity {
                         starsLeftToBeWinRecord sr = new starsLeftToBeWinRecord();
                         sr.theirRank = c.getString("TheirRank");
                         switch(c.getInt("StarsToBeWin")) {
+                            case 0:
+                                sr.starsLeftImage = R.drawable.flat_no_stars;
+                                break;
                             case 1:
                                 sr.starsLeftImage = R.drawable.flat_one_star;
                                 break;

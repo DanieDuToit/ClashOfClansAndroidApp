@@ -23,15 +23,15 @@
         android:layout_marginTop="15dp"
         android:layout_marginEnd="5dp"/>
 
-    <!--<TextView-->
-        <!--android:layout_width="30dp"-->
-        <!--android:layout_height="wrap_content"-->
-        <!--android:text="OurRank"-->
-        <!--android:id="@+id/stat_ourRank"-->
-        <!--android:layout_marginStart="10dp"-->
-        <!--android:layout_marginTop="15dp"-->
-        <!--android:layout_marginEnd="5dp"-->
-        <!--/>-->
+    <TextView
+        android:layout_width="50dp"
+        android:layout_height="wrap_content"
+        android:text="OurRank"
+        android:id="@+id/stat_ourRank"
+        android:layout_marginStart="5dp"
+        android:layout_marginTop="15dp"
+        android:layout_marginEnd="5dp"
+        />
 
     <TextView
         android:layout_width="50dp"

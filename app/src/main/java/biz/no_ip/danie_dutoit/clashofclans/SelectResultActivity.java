@@ -12,6 +12,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.GridView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import org.apache.http.NameValuePair;
@@ -53,6 +54,9 @@ public class SelectResultActivity extends Activity {
 
         unLockAttackUrl = gs.getInternetURL() + "removeAttackLock.php";
         setScoreUrl = gs.getInternetURL() + "update_ourAttackForApp.php";
+
+        TextView tv = (TextView) findViewById(R.id.tvSelectPrompt);
+        tv.setText("Please Select the stars you took from Rank # " + gs.getTheirRank());
 
         adapter = new SelectResultCustomGrid(SelectResultActivity.this, web, imageId);
         grid = (GridView) findViewById(R.id.selectResultGridView);

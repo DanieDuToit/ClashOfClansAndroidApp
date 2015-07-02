@@ -1,10 +1,15 @@
 package biz.no_ip.danie_dutoit.clashofclans;
 
+import android.app.ActionBar;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
@@ -12,6 +17,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.*;
+
 import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
 import org.json.JSONArray;
@@ -24,9 +30,14 @@ import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 
 public class MainActivity extends Activity implements View.OnClickListener, AdapterView.OnItemSelectedListener {
-    final ArrayList<String> warList = new ArrayList<>();
-    final ArrayList<Integer> warIDList = new ArrayList<>();
+    public static String name;
+    public static String email;
+
+    // Asyntask
+    AsyncTask<Void, Void, Void> mRegisterTask;
+
     Button submitBtn;
+    Button refreshNextAttackerListBtn;
     JSONArray data = null;
     Spinner nameSpinner;
     Spinner warSpinner;
@@ -34,93 +45,113 @@ public class MainActivity extends Activity implements View.OnClickListener, Adap
     ArrayList<Integer> gameNameIDs = new ArrayList<>();
     ArrayList<Integer> playerRanks = new ArrayList<>();
     ArrayList<String> nextAttackerNames = new ArrayList<>();
-    ArrayList<Integer> nextAttacker = new ArrayList<>();
+    ArrayList<String> attackOrderList = new ArrayList<>();
     String selectedGameName;
     String selectedWar;
     Integer selectedWarID;
-    ArrayAdapter<String> warSelectorAdapter;
     GetParticipantsForWar participantsDownloader;
-    GetNumberOfParticipants numberOfparticipantsDownloader;
     GetActiveWars warsDownloader;
-    ArrayAdapter<String> WarsDataAdapter;
     ArrayAdapter<String> NamesDataAdapter;
     ArrayAdapter<String> NextAttackersAdapter;
+    ProgressDialog pDialogNumParticipants;
     private String getWarsUrl = "";
     private String getNumberOfParticipantsUrl = "";
     private String getParticipantNamesUrl = "";
     private String isSomebodyAttackingUrl = "";
-    ProgressDialog pDialogNumParticipants;
     private ProgressDialog pDialogWar;
     private ProgressDialog pDialogNames;
     private ProgressDialog pIsPlayerAttacking;
-    private GlobalState gs;
-    private IsSomebodyAttacking somebodyAttackingDownloader;
     private int prevWarID = 0;
     private int attackingRank = 0;
     private String attackingGameName = "";
     private ProgressBar pb;
-    private ListView lvAttackers;
+    private Spinner recommendedNextAttackersSpinner;
+    private String warDate = "";
+    private Integer selectedRank = 0;
+    private GlobalState gs;
+    private TextView lblMessage;
+    // Create a broadcast receiver to get message and show on screen
+    private final BroadcastReceiver mHandleMessageReceiver = new BroadcastReceiver() {
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+
+            String newMessage = intent.getExtras().getString(GCMConfig.EXTRA_MESSAGE);
+
+            // Waking up mobile if it is sleeping
+            gs.acquireWakeLock(getApplicationContext());
+
+            // Display message on the screen
+            lblMessage.append(newMessage + "\n");
+
+            Toast.makeText(getApplicationContext(), "Got Message: " + newMessage, Toast.LENGTH_LONG).show();
+
+            // Releasing wake lock
+            gs.releaseWakeLock();
+        }
+    };
+
+    @Override
+    protected void onRestart() {
+        super.onRestart();
+        new GetAttackOrders().execute();
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        lblMessage = (TextView) findViewById(R.id.lblMessage);
+
+        gs = (GlobalState) getApplication();
+
+        // Check if Internet present
+        if (!gs.isConnectingToInternet()) {
+
+            // Internet Connection is not present
+            gs.showAlertDialog(MainActivity.this,
+                    "Internet Connection Error",
+                    "Please connect to Internet connection", false);
+            // stop executing code by return
+            return;
+        }
+
+        // Make sure the device has the proper dependencies.
+        GCMRegistrar.checkDevice(this);
+
+        // Make sure the manifest permissions was properly set
+        GCMRegistrar.checkManifest(this);
+
+
+        String versionName = "";
+        try {
+            final PackageInfo packageInfo = getPackageManager().getPackageInfo(getPackageName(), 0);
+            versionName = packageInfo.versionName;
+        } catch (PackageManager.NameNotFoundException e) {
+            e.printStackTrace();
+        }
+
+        ActionBar ab = getActionBar();
+        if (ab != null)
+            ab.setTitle("COC War Guidance. Version: " + versionName);
+
         submitBtn = (Button) findViewById(R.id.submit);
         submitBtn.setOnClickListener(this);
-        gs = (GlobalState) getApplication();
+
+        refreshNextAttackerListBtn = (Button) findViewById(R.id.btnRefreshAttackersList);
+        refreshNextAttackerListBtn.setOnClickListener(this);
+
         getWarsUrl = gs.getInternetURL() + "GetActiveWars.php";
         getParticipantNamesUrl = gs.getInternetURL() + "get_participantsForWarFoApp.php";
         getNumberOfParticipantsUrl = gs.getInternetURL() + "get_NumberOfParticipants.php";
         isSomebodyAttackingUrl = gs.getInternetURL() + "get_IsAttackingRank.php";
         selectedWarID = 0;
 
-        // Spinner element
-        warsDownloader = new GetActiveWars();
-        warsDownloader.execute();
-
-//        participantsDownloader = new GetParticipantsForWar();
-//        participantsDownloader.execute();
-//
-//        numberOfparticipantsDownloader = new GetNumberOfParticipants();
-//        numberOfparticipantsDownloader.execute();
-
-//        somebodyAttackingDownloader = new IsSomebodyAttacking();
-
-        lvAttackers = (ListView) findViewById(R.id.nextAttackersListView);
-
-        warSpinner = (Spinner) findViewById(R.id.selectWarSpinner);
         nameSpinner = (Spinner) findViewById(R.id.gameNameSpinner);
-
         NamesDataAdapter = new ArrayAdapter<String>
                 (MainActivity.this, android.R.layout.simple_spinner_dropdown_item, gameNamesList);
-        WarsDataAdapter = new ArrayAdapter<String>
-                (MainActivity.this, android.R.layout.simple_spinner_dropdown_item, warList);
 
-        warSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                int index = warSpinner.getSelectedItemPosition();
-                selectedWar = warList.get(index);
-                selectedWarID = warIDList.get(index);
-                gs.setWarName(selectedWar);
-                gs.setWarID(selectedWarID);
-                // did this to skip it for only the first time
-                if (prevWarID != 0) {
-                    prevWarID = selectedWarID;
-                    NamesDataAdapter.clear();
-                    participantsDownloader.execute();
-                }
-                prevWarID = selectedWarID;
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {
-                selectedWar = warList.get(0);
-                gs.setWarName(selectedWar);
-                gs.setWarID(warIDList.get(0));
-            }
-        });
 
         nameSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
@@ -140,6 +171,22 @@ public class MainActivity extends Activity implements View.OnClickListener, Adap
                 gs.setRank(playerRanks.get(0));
             }
         });
+
+        recommendedNextAttackersSpinner = (Spinner) findViewById(R.id.recommendedNextAttackersSpinner);
+        recommendedNextAttackersSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                String s = recommendedNextAttackersSpinner.getSelectedItem().toString();
+                nameSpinner.setSelection(NamesDataAdapter.getPosition(s));
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
+
+        new GetActiveWars().execute();
     }
 
     @Override
@@ -155,19 +202,20 @@ public class MainActivity extends Activity implements View.OnClickListener, Adap
     }
 
     private void CreateMenu(Menu menu) {
-        MenuItem mnu1 = menu.add(0, 0, 0, "War Progress");
+        MenuItem mnu0 = menu.add(0, 0, 1, "Setup GCM");
         {
-//            mnu1.setAlphabeticShortcut('p');
+            mnu0.setIcon(R.drawable.ic_launcher);
+        }
+        MenuItem mnu1 = menu.add(0, 1, 2, "War Progress");
+        {
             mnu1.setIcon(R.drawable.ic_launcher);
         }
-        MenuItem mnu2 = menu.add(0, 1, 1, "Us VS Them");
+        MenuItem mnu2 = menu.add(0, 2, 3, "Us VS Them");
         {
-//            mnu2.setAlphabeticShortcut('v');
             mnu2.setIcon(R.drawable.ic_launcher);
         }
-        MenuItem mnu3 = menu.add(0, 2, 2, "Stars Left");
+        MenuItem mnu3 = menu.add(0, 3, 4, "Stars Left");
         {
-//            mnu3.setAlphabeticShortcut('c');
             mnu3.setIcon(R.drawable.ic_launcher);
         }
     }
@@ -175,14 +223,18 @@ public class MainActivity extends Activity implements View.OnClickListener, Adap
     private boolean MenuChoice(MenuItem item) {
         switch (item.getItemId()) {
             case 0:
+                Intent setupGCMIntent = new Intent("android.intent.action.GCMRegisterActivity");
+                startActivity(setupGCMIntent);
+                return true;
+            case 1:
                 Intent warProgressIntent = new Intent("android.intent.action.WarProgressActivity");
                 startActivity(warProgressIntent);
                 return true;
-            case 1:
+            case 2:
                 Intent usVsThemIntent = new Intent("android.intent.action.UsVsThemActivity");
                 startActivity(usVsThemIntent);
                 return true;
-            case 2:
+            case 3:
                 Intent StarsLeftIntent = new Intent("android.intent.action.StarsLeftToBeWinActivity");
                 startActivity(StarsLeftIntent);
                 return true;
@@ -190,13 +242,14 @@ public class MainActivity extends Activity implements View.OnClickListener, Adap
         return false;
     }
 
-
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.submit:
                 new IsSomebodyAttacking().execute();
                 break;
+            case R.id.btnRefreshAttackersList:
+                new GetAttackOrders().execute();
             default:
                 break;
         }
@@ -204,13 +257,31 @@ public class MainActivity extends Activity implements View.OnClickListener, Adap
 
     @Override
     public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-        selectedWar = warList.get(position);
-        selectedWarID = warIDList.get(position);
+
     }
 
     @Override
     public void onNothingSelected(AdapterView<?> parent) {
 
+    }
+
+    @Override
+    protected void onDestroy() {
+        // Cancel AsyncTask
+        if (mRegisterTask != null) {
+            mRegisterTask.cancel(true);
+        }
+        try {
+            // Unregister Broadcast Receiver
+            unregisterReceiver(mHandleMessageReceiver);
+
+            //Clear internal resources.
+            GCMRegistrar.onDestroy(this);
+
+        } catch (Exception e) {
+            Log.e("UnRegister Error", "> " + e.getMessage());
+        }
+        super.onDestroy();
     }
 
     private class GetParticipantsForWar extends AsyncTask<Void, Void, Void> {
@@ -244,10 +315,9 @@ public class MainActivity extends Activity implements View.OnClickListener, Adap
                     for (int i = 0; i < data.length(); i++) {
                         // Data node is JSON Object
                         JSONObject c = data.getJSONObject(i);
-                        gameNamesList.add(c.getString("gamename"));
+                        gameNamesList.add(c.getString("gamename") + "(" + String.valueOf(c.getInt("rank")) + ")");
                         gameNameIDs.add(c.getInt("ourparticipantid"));
                         playerRanks.add(c.getInt("rank"));
-                        nextAttacker.add(c.getInt("nextattacker"));
                     }
                 } catch (JSONException e) {
                     e.printStackTrace();
@@ -262,8 +332,81 @@ public class MainActivity extends Activity implements View.OnClickListener, Adap
         protected void onPreExecute() {
             super.onPreExecute();
             // Showing progress dialog
+//            pDialogNames = new ProgressDialog(MainActivity.this);
+//            pDialogNames.setMessage("Downloading Participants. Please wait...");
+//            pDialogNames.setCancelable(true);
+//            pDialogNames.show();
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            super.onPostExecute(aVoid);
+            // Dismiss the progress dialog
+//            if (pDialogNames.isShowing()) {
+//                pDialogNames.dismiss();
+//            }
+
+            NamesDataAdapter = new ArrayAdapter<String>
+                    (MainActivity.this, android.R.layout.simple_spinner_dropdown_item, gameNamesList);
+            nameSpinner.setAdapter(NamesDataAdapter);
+            new GetNumberOfParticipants().execute();
+        }
+    }
+
+    private class GetAttackOrders extends AsyncTask<Void, Void, Void> {
+        private final ReentrantLock lock = new ReentrantLock();
+        private final Condition tryAgain = lock.newCondition();
+        // Creating service handler class instance
+        ServiceHandler sh = new ServiceHandler();
+        private volatile boolean finished = false;
+
+        @Override
+        protected Void doInBackground(Void... voids) {
+            // Making a request to url and getting response
+            List<NameValuePair> queryParams = new ArrayList<NameValuePair>();
+            queryParams.add(new BasicNameValuePair("selectedWarID", selectedWarID.toString()));
+            String jsonStr = sh.makeServiceCall(gs.getInternetURL() + "get_orderOfAttacks.php", ServiceHandler.POST, queryParams);
+            Log.e("JSONString", jsonStr);
+
+            nextAttackerNames.clear();
+
+            if (jsonStr != null) {
+                try {
+                    JSONObject jsonObj = new JSONObject(jsonStr);
+
+                    // Getting JSON Array node
+                    data = jsonObj.getJSONArray("orderOfAttacks");
+                    Log.e("JSONData", data.getString(0));
+
+                    // Gert the first rank to set the gameNane list to the same
+                    JSONObject c = data.getJSONObject(0);
+                    selectedRank = c.getInt("OurRank");
+
+                    // looping through All Contacts
+                    for (int i = 0; i < data.length(); i++) {
+                        // Data node is JSON Object
+                        c = data.getJSONObject(i);
+                        nextAttackerNames.add(c.getString("GameName") + "(" + c.getString("OurRank") + ")");
+                    }
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            } else {
+                Log.e("ServiceHandler", "Couldn't get any data from the url");
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            // Showing progress dialog
+            // Dismiss the progress dialog
+            if (pDialogWar.isShowing()) {
+                pDialogWar.dismiss();
+            }
             pDialogNames = new ProgressDialog(MainActivity.this);
-            pDialogNames.setMessage("Downloading Participants. Please wait...");
+            pDialogNames.setMessage("Downloading Order of attacks. Please wait...");
             pDialogNames.setCancelable(true);
             pDialogNames.show();
         }
@@ -276,19 +419,9 @@ public class MainActivity extends Activity implements View.OnClickListener, Adap
                 pDialogNames.dismiss();
             }
 
-            nextAttackerNames.clear();
-            for (int i = 0; i < nextAttacker.size(); i++) {
-                if (nextAttacker.get(i) == 1) {
-                    nextAttackerNames.add(gameNamesList.get(i));
-                }
-            }
-
             NextAttackersAdapter = new ArrayAdapter<String>(MainActivity.this,
                     android.R.layout.simple_list_item_1, nextAttackerNames);
-            lvAttackers.setAdapter(NextAttackersAdapter);
-
-            nameSpinner.setAdapter(NamesDataAdapter);
-            new GetNumberOfParticipants().execute();
+            recommendedNextAttackersSpinner.setAdapter(NextAttackersAdapter);
         }
     }
 
@@ -302,10 +435,7 @@ public class MainActivity extends Activity implements View.OnClickListener, Adap
             List<NameValuePair> queryParams = new ArrayList<NameValuePair>();
             queryParams.add(new BasicNameValuePair("dummy", ""));
             String jsonStr = sh.makeServiceCall(getWarsUrl, ServiceHandler.POST, queryParams);
-//            Log.e("JSONString", jsonStr);
-
-            warList.clear();
-            warIDList.clear();
+            //            Log.e("JSONString", jsonStr);
 
             if (jsonStr != null) {
                 try {
@@ -315,14 +445,13 @@ public class MainActivity extends Activity implements View.OnClickListener, Adap
                     data = jsonObj.getJSONArray("wars");
                     Log.e("JSONData", data.getString(0));
 
-                    // looping through All Contacts
-                    for (int i = 0; i < data.length(); i++) {
-                        publishProgress();
-                        // Data node is JSON Object
-                        JSONObject c = data.getJSONObject(i);
-                        warList.add(c.getString("Date"));
-                        warIDList.add(c.getInt("WarID"));
-                    }
+                    // Data node is JSON Object
+                    // Only one record is expected
+                    JSONObject c = data.getJSONObject(0);
+                    warDate = c.getString("Date"); // there should only be one
+                    selectedWarID = c.getInt("WarID");
+                    gs.setWarName(selectedWar);
+                    gs.setWarID(selectedWarID);
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
@@ -337,7 +466,7 @@ public class MainActivity extends Activity implements View.OnClickListener, Adap
             super.onPreExecute();
             // Showing progress dialog
             pDialogWar = new ProgressDialog(MainActivity.this);
-            pDialogWar.setMessage("Downloading Wars. Please wait...");
+            pDialogWar.setMessage("Downloading Data. Please wait...");
             pDialogWar.setCancelable(true);
             pDialogWar.show();
         }
@@ -345,11 +474,9 @@ public class MainActivity extends Activity implements View.OnClickListener, Adap
         @Override
         protected void onPostExecute(Void aVoid) {
             super.onPostExecute(aVoid);
-            // Dismiss the progress dialog
-            if (pDialogWar.isShowing()) {
-                pDialogWar.dismiss();
-            }
-            warSpinner.setAdapter(WarsDataAdapter);
+            TextView tv = (TextView) findViewById(R.id.warText);
+            tv.setText("War date: " + warDate);
+
             new GetParticipantsForWar().execute();
         }
     }
@@ -395,19 +522,21 @@ public class MainActivity extends Activity implements View.OnClickListener, Adap
         protected void onPreExecute() {
             super.onPreExecute();
             // Showing progress dialog
-            pDialogNumParticipants = new ProgressDialog(MainActivity.this);
-            pDialogNumParticipants.setMessage("Downloading Number Of Participants. Please wait...");
-            pDialogNumParticipants.setCancelable(true);
-            pDialogNumParticipants.show();
+//            pDialogNumParticipants = new ProgressDialog(MainActivity.this);
+//            pDialogNumParticipants.setMessage("Downloading Number Of Participants. Please wait...");
+//            pDialogNumParticipants.setCancelable(true);
+//            pDialogNumParticipants.show();
         }
 
         @Override
         protected void onPostExecute(Void aVoid) {
             super.onPostExecute(aVoid);
             // Dismiss the progress dialog
-            if (pDialogNumParticipants.isShowing()) {
-                pDialogNumParticipants.dismiss();
-            }
+//            if (pDialogNumParticipants.isShowing()) {
+//                pDialogNumParticipants.dismiss();
+//            }
+
+            new GetAttackOrders().execute();
         }
     }
 

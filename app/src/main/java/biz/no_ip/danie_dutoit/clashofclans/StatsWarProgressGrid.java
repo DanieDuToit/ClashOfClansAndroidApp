@@ -76,11 +76,11 @@ public class StatsWarProgressGrid extends BaseAdapter {
                 st.setImageResource(R.drawable.no_attack);
         }
 
-//        i = statWarProgressRecords.get(position).ourRank;
-//        s = String.valueOf(i);
-//        TextView or = (TextView) grid.findViewById(R.id.stat_ourRank);
-//        or.setText(s);
-//
+        i = statWarProgressRecords.get(position).ourRank;
+        s = String.valueOf(i);
+        TextView or = (TextView) grid.findViewById(R.id.stat_ourRank);
+        or.setText(s);
+
         i = statWarProgressRecords.get(position).theirRank;
         s = String.valueOf(i);
         TextView tr = (TextView) grid.findViewById(R.id.stat_theirRank);

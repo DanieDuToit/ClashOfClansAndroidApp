@@ -16,16 +16,16 @@
         android:text="Game Name"
         android:id="@+id/gameName"
         android:layout_gravity="center_horizontal"
-        android:textColor="#ff0000ff"/>
+        android:textColor="@android:color/holo_orange_dark"/>
 
-    <Button
+    <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="View War Stats"
-        android:id="@+id/buttonViewWarStats"
+        android:text="Please click on the X if you intent to attack your recommended target"
+        android:id="@+id/tvRecommendedTargetMessageID"
         android:layout_gravity="center_horizontal"
-        android:layout_marginTop="5dp"
-        android:layout_marginBottom="5dp"/>
+        android:textColor="@android:color/holo_green_dark"
+        android:textAppearance="?android:attr/textAppearanceMedium"/>
 
     <GridView
             android:id="@+id/gridView"
