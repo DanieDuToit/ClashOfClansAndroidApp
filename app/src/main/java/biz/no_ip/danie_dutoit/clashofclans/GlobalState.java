@@ -35,6 +35,13 @@ public class GlobalState extends Application {
     private PowerManager.WakeLock wakeLock;
     private static Context context;
 
+    public String getInternetURL() {
+//		return "http://172.24.0.239/ClashOfClans/";
+//		return "http://172.24.0.239:9001/ClashOfClans/";
+        return "http://daniedutoit.no-ip.biz/ClashOfClans/";
+//        return "http://10.0.0.6:9001/ClashOfClans/";
+    }
+
     public void onCreate(){
         super.onCreate();
         GlobalState.context = getApplicationContext();
@@ -164,27 +171,20 @@ public class GlobalState extends Application {
         this.warName = warname;
     }
 
-    public String getInternetURL() {
-//		return "http://172.24.0.239/ClashOfClans/";
-//		return "http://172.24.0.239:9001/ClashOfClans/";
-        return "http://daniedutoit.no-ip.biz/ClashOfClans/";
-    }
-
     void sendGlobalNotification(final Context context, String message) {
         String serverUrl = getInternetURL() + "GCM_sendGlobalNotification.php";
         Map<String, String> params = new HashMap<String, String>();
         params.put("message", message);
+        long backoff = BACKOFF_MILLI_SECONDS + random.nextInt(1000);
         for (int i = 1; i <= MAX_ATTEMPTS; i++) {
-            long backoff = BACKOFF_MILLI_SECONDS + random.nextInt(1000);
             Log.d(GCMConfig.TAG, "Attempt #" + i + " to register");
             try {
                 //Send Broadcast to Show message on screen
                 displayMessageOnScreen(context, context.getString(
-                        R.string.sending_push_notification, gameName)
+                                R.string.sending_push_notification, gameName)
                 );
                 // Post registration values to web server
                 post(serverUrl, params);
-                GCMRegistrar.setRegisteredOnServer(context, true);
                 return;
             } catch (IOException e) {
                 Log.e(GCMConfig.TAG, "Failed to send notification on attempt " + i + ":" + e);

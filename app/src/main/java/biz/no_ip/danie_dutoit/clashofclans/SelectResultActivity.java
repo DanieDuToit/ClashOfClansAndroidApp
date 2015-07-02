@@ -33,7 +33,8 @@ public class SelectResultActivity extends Activity {
     JSONArray data = null;
     ProgressDialog pUnlockLockRank;
     GridView grid;
-    public int starstaken;
+    private int starstaken;
+    private int theirRank;
     String[] web = {"0", "1", "2", "3"};
     int[] imageId = {
             R.drawable.zerostars,
@@ -158,7 +159,7 @@ public class SelectResultActivity extends Activity {
 
             int selectedWarID = gs.getWarID();
             int st = starstaken;
-            int theirRank = gs.getTheirRank();
+            theirRank = gs.getTheirRank();
 
             queryParams.add(new BasicNameValuePair("selectedWarID", gs.getWarID().toString()));
             queryParams.add(new BasicNameValuePair("ourparticipantid", gs.getOurParticipantID().toString()));
@@ -177,6 +178,17 @@ public class SelectResultActivity extends Activity {
             } else {
                 Log.e("ServiceHandler", "Couldn't get any data from the url");
             }
+
+            queryParams.clear();
+            queryParams.add(new BasicNameValuePair("message", gs.getGameName() +
+                    " just scored " +
+                    String.valueOf(starstaken) +
+                    " stars agains " +
+                    String.valueOf(theirRank)));
+            jsonStr = sh.makeServiceCall(gs.getInternetURL() + "GCM_sendGlobalNotification.php", ServiceHandler.POST, queryParams);
+
+            Log.e("JSONString", jsonStr);
+
             return null;
         }
 
@@ -198,7 +210,6 @@ public class SelectResultActivity extends Activity {
                 pUnlockLockRank.dismiss();
             }
             new UnLockAttack().execute();
-            gs.sendGlobalNotification(GlobalState.getAppContext(), gs.getGameName() + " just scored " + String.valueOf(starstaken));
         }
     }
 }
