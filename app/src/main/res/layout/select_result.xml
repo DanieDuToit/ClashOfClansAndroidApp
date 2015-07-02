@@ -7,11 +7,11 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Please Select the stars you took on your attack"
-        android:id="@+id/textView3"
+        android:text="Please Select the stars you took from Rank # "
+        android:id="@+id/tvSelectPrompt"
         android:layout_gravity="center_horizontal"
         android:textIsSelectable="false"
-        android:textSize="@dimen/abc_text_size_medium_material"
+        android:textSize="20dp"
         android:textStyle="bold"
         android:layout_marginTop="20dp"
         android:layout_marginBottom="20dp"/>

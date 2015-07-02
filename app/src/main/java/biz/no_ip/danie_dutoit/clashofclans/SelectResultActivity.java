@@ -12,6 +12,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.GridView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import org.apache.http.NameValuePair;
@@ -28,11 +29,11 @@ import java.util.Set;
  * Created by dutoitd1 on 2015/06/08.
  */
 public class SelectResultActivity extends Activity {
+    protected GlobalState gs;
     JSONArray data = null;
-    GlobalState gs;
     ProgressDialog pUnlockLockRank;
     GridView grid;
-    int starstaken;
+    public int starstaken;
     String[] web = {"0", "1", "2", "3"};
     int[] imageId = {
             R.drawable.zerostars,
@@ -49,10 +50,13 @@ public class SelectResultActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.select_result);
 
-        gs = (GlobalState) getApplication();
+        gs = (GlobalState) getApplicationContext();
 
         unLockAttackUrl = gs.getInternetURL() + "removeAttackLock.php";
         setScoreUrl = gs.getInternetURL() + "update_ourAttackForApp.php";
+
+        TextView tv = (TextView) findViewById(R.id.tvSelectPrompt);
+        tv.setText("Please Select the stars you took from Rank # " + gs.getTheirRank());
 
         adapter = new SelectResultCustomGrid(SelectResultActivity.this, web, imageId);
         grid = (GridView) findViewById(R.id.selectResultGridView);
@@ -194,6 +198,7 @@ public class SelectResultActivity extends Activity {
                 pUnlockLockRank.dismiss();
             }
             new UnLockAttack().execute();
+            gs.sendGlobalNotification(GlobalState.getAppContext(), gs.getGameName() + " just scored " + String.valueOf(starstaken));
         }
     }
 }
