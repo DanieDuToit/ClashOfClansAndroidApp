@@ -19,6 +19,8 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.gcm.GoogleCloudMessaging;
+
 import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
 import org.json.JSONArray;
@@ -34,7 +36,7 @@ import java.util.concurrent.locks.ReentrantLock;
 /**
  * Created by dutoitd1 on 2015/06/29.
  */
-public class GCMRegisterActivity extends Activity {
+public class GCMRegisterActivity extends Activity implements GCMConfig {
     public String gameName;
     public String email;
     // UI elements
@@ -52,6 +54,7 @@ public class GCMRegisterActivity extends Activity {
     Spinner gameNameSpinner;
     private GlobalState gs;
     private String registrationId;
+    GoogleCloudMessaging gcm;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -150,72 +153,76 @@ public class GCMRegisterActivity extends Activity {
 
         // Click event on Register button
         btnRegister.setOnClickListener(new View.OnClickListener() {
-
             @Override
             public void onClick(View arg0) {
-                // Get data from EditText
-//                gameName = txtName.getText().toString();
-//                email = txtEmail.getText().toString();
-
-                // Check if user filled the form
-                email = txtEmail.getText().toString();
-                if (gameName.trim().length() > 0 && email.trim().length() > 0) {
-                    // Get GCM registration id
-                    registrationId = GCMRegistrar.getRegistrationId(GCMRegisterActivity.this);
-
-                    // Check if regid already presents
-                    if (registrationId.equals("")) {
-
-                        // Register with GCM
-                        GCMRegistrar.register(GCMRegisterActivity.this, GCMConfig.GOOGLE_SENDER_ID);
-
-                    } else {
-
-                        // Device is already registered on GCM Server
-                        if (GCMRegistrar.isRegisteredOnServer(GCMRegisterActivity.this)) {
-
-                            // Skips registration.
-                            Toast.makeText(getApplicationContext(), "Already registered with GCM Server", Toast.LENGTH_LONG).show();
-
-                        } else {
-
-                            // Try to register again, but not in the UI thread.
-                            // It's also necessary to cancel the thread onDestroy(),
-                            // hence the use of AsyncTask instead of a raw thread.
-
-                            mRegisterTask = new AsyncTask<Void, Void, Void>() {
-
-                                @Override
-                                protected Void doInBackground(Void... params) {
-
-                                    // Register on our server
-                                    // On server creates a new user
-                                    aGCMController.register(context, gameName, email, registrationId);
-                                    return null;
-                                }
-
-                                @Override
-                                protected void onPostExecute(Void result) {
-                                    final String regId = GCMRegistrar.getRegistrationId(GCMRegisterActivity.this);
-                                    txtViewRegistrationId.setText(regId);
-                                    mRegisterTask = null;
-                                }
-
-                            };
-
-                            // execute AsyncTask
-                            mRegisterTask.execute(null, null, null);
-                        }
-                    }
-                    txtViewRegistrationId.setText(registrationId);
-                } else {
-
+                if (gameName.trim().length() == 0 && txtEmail.getText().toString().trim().length() == 0) {
                     // user did not fill in all the data
                     aGCMController.showAlertDialog(GCMRegisterActivity.this,
                             "Registration Error!",
                             "Please enter your details",
                             false);
+                } else {
+                    getRegId();
                 }
+//                // Check if user filled the form
+//                email = txtEmail.getText().toString();
+//                if (gameName.trim().length() > 0 && email.trim().length() > 0) {
+//                    // Get GCM registration id
+//                    registrationId = GCMRegistrar.getRegistrationId(GCMRegisterActivity.this);
+//
+//                    // Check if regid already presents
+//                    if (registrationId.equals("")) {
+//
+//                        // Register with GCM
+//                        GCMRegistrar.register(GCMRegisterActivity.this, GCMConfig.GOOGLE_SENDER_ID);
+//
+//                    } else {
+//
+//                        // Device is already registered on GCM Server
+//                        if (GCMRegistrar.isRegisteredOnServer(GCMRegisterActivity.this)) {
+//
+//                            // Skips registration.
+//                            Toast.makeText(getApplicationContext(), "Already registered with GCM Server", Toast.LENGTH_LONG).show();
+//
+//                        } else {
+//
+//                            // Try to register again, but not in the UI thread.
+//                            // It's also necessary to cancel the thread onDestroy(),
+//                            // hence the use of AsyncTask instead of a raw thread.
+//
+//                            mRegisterTask = new AsyncTask<Void, Void, Void>() {
+//
+//                                @Override
+//                                protected Void doInBackground(Void... params) {
+//
+//                                    // Register on our server
+//                                    // On server creates a new user
+//                                    aGCMController.register(context, gameName, email, registrationId);
+//                                    return null;
+//                                }
+//
+//                                @Override
+//                                protected void onPostExecute(Void result) {
+//                                    final String regId = GCMRegistrar.getRegistrationId(GCMRegisterActivity.this);
+//                                    txtViewRegistrationId.setText(regId);
+//                                    mRegisterTask = null;
+//                                }
+//
+//                            };
+//
+//                            // execute AsyncTask
+//                            mRegisterTask.execute(null, null, null);
+//                        }
+//                    }
+//                    txtViewRegistrationId.setText(registrationId);
+//                } else {
+//
+//                    // user did not fill in all the data
+//                    aGCMController.showAlertDialog(GCMRegisterActivity.this,
+//                            "Registration Error!",
+//                            "Please enter your details",
+//                            false);
+//                }
             }
         });
 
@@ -254,6 +261,67 @@ public class GCMRegisterActivity extends Activity {
                 }, 60000);
             }
         });
+    }
+
+    public void getRegId() {
+        registrationId = GCMRegistrar.getRegistrationId(this);
+        final String msg = "Device registered, registration ID=" + registrationId;
+        txtViewRegistrationId.setText(msg + "\n");
+//        new AsyncTask<Void, Void, String>() {
+//            @Override
+//            protected String doInBackground(Void... params) {
+//                String msg = "";
+//                try {
+//                    if (gcm == null) {
+//                        gcm = GoogleCloudMessaging.getInstance(getApplicationContext());
+//                    }
+//                    registrationId = gcm.register(GOOGLE_SENDER_ID);
+//                    msg = "Device registered, registration ID=" + registrationId;
+//                    Log.i("GCM", msg);
+//
+//                } catch (IOException ex) {
+//                    msg = "Error :" + ex.getMessage();
+//
+//                }
+//                return msg;
+//            }
+//
+//            @Override
+//            protected void onPostExecute(String msg) {
+//                txtViewRegistrationId.setText(msg + "\n");
+//
+                final SaveGCMInfo downloader = new SaveGCMInfo();
+                downloader.execute();
+                Handler handler = new Handler();
+                handler.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        if (downloader.getStatus() == AsyncTask.Status.RUNNING) {
+                            downloader.cancel(true);
+                            if (pDialog.isShowing()) {
+                                pDialog.dismiss();
+                            }
+                            new AlertDialog.Builder(GCMRegisterActivity.this)
+                                    .setTitle("Result")
+                                    .setMessage("Internet connection timed out. Try again?")
+                                    .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+                                        public void onClick(DialogInterface dialog, int which) {
+                                            btnSaveRegistration.performClick();
+                                        }
+                                    })
+                                    .setNegativeButton(android.R.string.no, new DialogInterface.OnClickListener() {
+                                        public void onClick(DialogInterface dialog, int which) {
+                                            android.os.Process.killProcess(android.os.Process.myPid());
+                                            System.exit(1);
+                                        }
+                                    })
+                                    .setIcon(android.R.drawable.ic_dialog_alert)
+                                    .show();
+                        }
+                    }
+                }, 60000);
+//            }
+//        }.execute(null, null, null);
     }
 
     private class GetActivePlayers extends AsyncTask<Void, Void, Void> {
@@ -328,7 +396,7 @@ public class GCMRegisterActivity extends Activity {
             // Making a request to url and getting response
             List<NameValuePair> queryParams = new ArrayList<NameValuePair>();
             queryParams.add(new BasicNameValuePair("gameName", gameName));
-            queryParams.add(new BasicNameValuePair("email", email));
+            queryParams.add(new BasicNameValuePair("email", txtEmail.getText().toString()));
             queryParams.add(new BasicNameValuePair("gcmRegistrationId", registrationId));
             String jsonStr = sh.makeServiceCall(gs.getInternetURL() + "save_GCMInfo.php", ServiceHandler.POST, queryParams);
 
@@ -369,7 +437,7 @@ public class GCMRegisterActivity extends Activity {
             super.onPreExecute();
             // Showing progress dialog
             pDialog = new ProgressDialog(GCMRegisterActivity.this);
-            pDialog.setMessage("Downloading Players. Please wait...");
+            pDialog.setMessage("Saving your GCM Info. Please wait...");
             pDialog.setCancelable(true);
             pDialog.show();
         }

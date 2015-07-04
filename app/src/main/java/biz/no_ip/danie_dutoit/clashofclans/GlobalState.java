@@ -207,75 +207,75 @@ public class GlobalState extends Application {
     }
 
     // Register this account with the server.
-    void register(final Context context, String name, String email, final String regId) {
-
-        Log.i(GCMConfig.TAG, "registering device (regId = " + regId + ")");
-
-        String serverUrl = getInternetURL() + "GCM_Register.php";
-
-        Map<String, String> params = new HashMap<String, String>();
-        params.put("regId", regId);
-        params.put("name", name);
-        params.put("email", email);
-
-        long backoff = BACKOFF_MILLI_SECONDS + random.nextInt(1000);
-
-        // Once GCM returns a registration id, we need to register on our server
-        // As the server might be down, we will retry it a couple
-        // times.
-        for (int i = 1; i <= MAX_ATTEMPTS; i++) {
-
-            Log.d(GCMConfig.TAG, "Attempt #" + i + " to register");
-
-            try {
-                //Send Broadcast to Show message on screen
-                displayMessageOnScreen(context, context.getString(
-                        R.string.server_registering, i, MAX_ATTEMPTS));
-
-                // Post registration values to web server
-                post(serverUrl, params);
-
-                GCMRegistrar.setRegisteredOnServer(context, true);
-
-                //Send Broadcast to Show message on screen
-                String message = context.getString(R.string.server_registered);
-                displayMessageOnScreen(context, message);
-
-                return;
-            } catch (IOException e) {
-
-                // Here we are simplifying and retrying on any error; in a real
-                // application, it should retry only on unrecoverable errors
-                // (like HTTP error code 503).
-
-                Log.e(GCMConfig.TAG, "Failed to register on attempt " + i + ":" + e);
-
-                if (i == MAX_ATTEMPTS) {
-                    break;
-                }
-                try {
-
-                    Log.d(GCMConfig.TAG, "Sleeping for " + backoff + " ms before retry");
-                    Thread.sleep(backoff);
-
-                } catch (InterruptedException e1) {
-                    // Activity finished before we complete - exit.
-                    Log.d(GCMConfig.TAG, "Thread interrupted: abort remaining retries!");
-                    Thread.currentThread().interrupt();
-                    return;
-                }
-
-                // increase backoff exponentially
-                backoff *= 2;
-            }
-        }
-
-        String message = context.getString(R.string.server_register_error,
-                MAX_ATTEMPTS);
-
-        //Send Broadcast to Show message on screen
-        displayMessageOnScreen(context, message);
-    }
+//    void register(final Context context, String name, String email, final String regId) {
+//
+//        Log.i(GCMConfig.TAG, "registering device (regId = " + regId + ")");
+//
+//        String serverUrl = getInternetURL() + "GCM_Register.php";
+//
+//        Map<String, String> params = new HashMap<String, String>();
+//        params.put("regId", regId);
+//        params.put("name", name);
+//        params.put("email", email);
+//
+//        long backoff = BACKOFF_MILLI_SECONDS + random.nextInt(1000);
+//
+//        // Once GCM returns a registration id, we need to register on our server
+//        // As the server might be down, we will retry it a couple
+//        // times.
+//        for (int i = 1; i <= MAX_ATTEMPTS; i++) {
+//
+//            Log.d(GCMConfig.TAG, "Attempt #" + i + " to register");
+//
+//            try {
+//                //Send Broadcast to Show message on screen
+//                displayMessageOnScreen(context, context.getString(
+//                        R.string.server_registering, i, MAX_ATTEMPTS));
+//
+//                // Post registration values to web server
+//                post(serverUrl, params);
+//
+//                GCMRegistrar.setRegisteredOnServer(context, true);
+//
+//                //Send Broadcast to Show message on screen
+//                String message = context.getString(R.string.server_registered);
+//                displayMessageOnScreen(context, message);
+//
+//                return;
+//            } catch (IOException e) {
+//
+//                // Here we are simplifying and retrying on any error; in a real
+//                // application, it should retry only on unrecoverable errors
+//                // (like HTTP error code 503).
+//
+//                Log.e(GCMConfig.TAG, "Failed to register on attempt " + i + ":" + e);
+//
+//                if (i == MAX_ATTEMPTS) {
+//                    break;
+//                }
+//                try {
+//
+//                    Log.d(GCMConfig.TAG, "Sleeping for " + backoff + " ms before retry");
+//                    Thread.sleep(backoff);
+//
+//                } catch (InterruptedException e1) {
+//                    // Activity finished before we complete - exit.
+//                    Log.d(GCMConfig.TAG, "Thread interrupted: abort remaining retries!");
+//                    Thread.currentThread().interrupt();
+//                    return;
+//                }
+//
+//                // increase backoff exponentially
+//                backoff *= 2;
+//            }
+//        }
+//
+//        String message = context.getString(R.string.server_register_error,
+//                MAX_ATTEMPTS);
+//
+//        //Send Broadcast to Show message on screen
+//        displayMessageOnScreen(context, message);
+//    }
 
     // Unregister this account/device pair within the server.
     void unregister(final Context context, final String regId) {

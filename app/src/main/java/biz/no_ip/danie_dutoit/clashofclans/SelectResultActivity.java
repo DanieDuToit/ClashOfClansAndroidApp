@@ -180,7 +180,8 @@ public class SelectResultActivity extends Activity {
             }
 
             queryParams.clear();
-            queryParams.add(new BasicNameValuePair("message", gs.getGameName() +
+            // The prefix "ann" below will cause the announcement sound to be for announcement
+            queryParams.add(new BasicNameValuePair("message", "ann" + gs.getGameName() +
                     " just scored " +
                     String.valueOf(starstaken) +
                     " stars agains " +

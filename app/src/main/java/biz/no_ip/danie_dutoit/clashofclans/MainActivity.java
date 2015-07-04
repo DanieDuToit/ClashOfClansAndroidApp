@@ -8,6 +8,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.os.AsyncTask;
@@ -70,6 +71,8 @@ public class MainActivity extends Activity implements View.OnClickListener, Adap
     private Integer selectedRank = 0;
     private GlobalState gs;
     private TextView lblMessage;
+    private ScrollView svMessages;
+
     // Create a broadcast receiver to get message and show on screen
     private final BroadcastReceiver mHandleMessageReceiver = new BroadcastReceiver() {
 
@@ -83,6 +86,14 @@ public class MainActivity extends Activity implements View.OnClickListener, Adap
 
             // Display message on the screen
             lblMessage.append(newMessage + "\n");
+
+            // Scroll to the bottom of the Scrollview
+            svMessages.post(new Runnable() {
+                @Override
+                public void run() {
+                    svMessages.fullScroll(ScrollView.FOCUS_DOWN);
+                }
+            });
 
             Toast.makeText(getApplicationContext(), "Got Message: " + newMessage, Toast.LENGTH_LONG).show();
 
@@ -123,6 +134,52 @@ public class MainActivity extends Activity implements View.OnClickListener, Adap
         // Make sure the manifest permissions was properly set
         GCMRegistrar.checkManifest(this);
 
+        // Register custom Broadcast receiver to show messages on activity
+        registerReceiver(mHandleMessageReceiver, new IntentFilter(
+                GCMConfig.DISPLAY_MESSAGE_ACTION));
+
+        // Get GCM registration id
+        final String regId = GCMRegistrar.getRegistrationId(this);
+
+        // Check if regid already presents
+        if (regId.equals("")) {
+
+            // Register with GCM
+            GCMRegistrar.register(GlobalState.getAppContext(), GCMConfig.GOOGLE_SENDER_ID);
+
+        }
+//        else {
+//
+//            // Try to register again, but not in the UI thread.
+//            // It's also necessary to cancel the thread onDestroy(),
+//            // hence the use of AsyncTask instead of a raw thread.
+//
+//            final Context context = this;
+//            mRegisterTask = new AsyncTask<Void, Void, Void>() {
+//
+//                @Override
+//                protected Void doInBackground(Void... params) {
+//
+//                    // Register on our server
+//                    // On server creates a new user
+//                    gs.register(context, name, email, regId);
+//
+//                    return null;
+//                }
+//
+//                @Override
+//                protected void onPostExecute(Void result) {
+//                    mRegisterTask = null;
+//                }
+//
+//            };
+//
+//            // execute AsyncTask
+//            mRegisterTask.execute(null, null, null);
+//        }
+
+
+
 
         String versionName = "";
         try {
@@ -141,6 +198,7 @@ public class MainActivity extends Activity implements View.OnClickListener, Adap
 
         refreshNextAttackerListBtn = (Button) findViewById(R.id.btnRefreshAttackersList);
         refreshNextAttackerListBtn.setOnClickListener(this);
+        svMessages = (ScrollView) findViewById(R.id.svPushNotifications);
 
         getWarsUrl = gs.getInternetURL() + "GetActiveWars.php";
         getParticipantNamesUrl = gs.getInternetURL() + "get_participantsForWarFoApp.php";

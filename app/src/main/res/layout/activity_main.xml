@@ -1,53 +1,93 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              android:layout_width="fill_parent"
-              android:layout_height="fill_parent" android:orientation="vertical" android:weightSum="1">
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:orientation="vertical"
+    android:weightSum="1">
 
-    <TextView
+
+    <ScrollView
+        android:id="@+id/svPushNotifications"
         android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:id="@+id/lblMessage"
-        android:textColor="#ff0000ff"
-        android:textStyle="bold|italic"/>
+        android:layout_height="60dp"
+        android:fillViewport="false">
 
-    <TextView
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:id="@+id/lblMessage"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:textColor="#ff0000ff"
+                android:textStyle="bold|italic" />
+        </LinearLayout>
+    </ScrollView>
+
+    <ScrollView
+        android:id="@+id/scrollView"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+
+            <TextView
+                android:id="@+id/warText"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="War dated: xxxx"
-                android:id="@+id/warText" android:textSize="25dp"
-                android:textStyle="bold|italic"/>
+                android:textSize="25dp"
+                android:textStyle="bold|italic" />
 
-    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-              android:text="Please select your Game Name" android:id="@+id/textView2"
-              android:textSize="20dp"/>
-    <Spinner android:layout_width="fill_parent" android:layout_height="wrap_content" android:id="@+id/gameNameSpinner"
-             android:spinnerMode="dropdown"/>
-
-    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-              android:text="Recommended Next Attacker/s " android:id="@+id/textView4"
-              android:textSize="20dp"/>
-
-    <Spinner
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/recommendedNextAttackersSpinner"
-        android:spinnerMode="dropdown"/>
-
-    <LinearLayout
-        android:orientation="horizontal"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
-
-        <Button
+            <TextView
+                android:id="@+id/textView2"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Submit"
-                android:id="@+id/submit"/>
+                android:text="Please select your Game Name"
+                android:textSize="20dp" />
 
-        <Button
+            <Spinner
+                android:id="@+id/gameNameSpinner"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:spinnerMode="dropdown" />
+
+            <TextView
+                android:id="@+id/textView4"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Refresh Next Attackers list"
-                android:id="@+id/btnRefreshAttackersList"/>
-    </LinearLayout>
+                android:text="Recommended Next Attacker/s "
+                android:textSize="20dp" />
 
+            <Spinner
+                android:id="@+id/recommendedNextAttackersSpinner"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:spinnerMode="dropdown" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <Button
+                    android:id="@+id/submit"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Submit" />
+
+                <Button
+                    android:id="@+id/btnRefreshAttackersList"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Refresh Next Attackers list" />
+            </LinearLayout>
+
+        </LinearLayout>
+    </ScrollView>
 </LinearLayout>

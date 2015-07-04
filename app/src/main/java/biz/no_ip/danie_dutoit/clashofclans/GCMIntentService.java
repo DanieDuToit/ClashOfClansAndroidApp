@@ -35,8 +35,11 @@ public class GCMIntentService extends GCMBaseIntentService {
 
         Log.i(TAG, "Device registered: regId = " + registrationId);
         aGCMController.displayMessageOnScreen(context, "Your device registred with GCM");
-        Log.d("NAME", MainActivity.name);
-        aGCMController.register(context, MainActivity.name, MainActivity.email, registrationId);
+        aGCMController.displayMessageOnScreen(context, "Please register GCM Id to the COC WEB Server");
+
+        generateNotification(context, "attPlease register GCM Id to the COC WEB Server");
+//        Log.d("NAME", MainActivity.name);
+//        aGCMController.register(context, gs.getGameName(), MainActivity.email, registrationId);
     }
 
     /**
@@ -62,7 +65,13 @@ public class GCMIntentService extends GCMBaseIntentService {
         Log.i(TAG, "Received message");
         String message = intent.getExtras().getString("data");
 
-        aGCMController.displayMessageOnScreen(context, message);
+        String actualMessage = message;
+
+        // check if the message is an [ann]ouncement or an [att]ention message or a [cal]l for action
+        if (message.startsWith("att") || message.startsWith("ann") || message.startsWith("cal")) {
+            actualMessage = message.substring(3);
+        }
+        aGCMController.displayMessageOnScreen(context, actualMessage);
         // notifies user
         generateNotification(context, message);
     }
@@ -115,9 +124,17 @@ public class GCMIntentService extends GCMBaseIntentService {
     private static void generateNotification(Context context, String message) {
         int icon = R.drawable.ic_launcher;
         long when = System.currentTimeMillis();
+        String actualMessage = message;
+
+        // check if the message is an [ann]ouncement or an [att]ention message or a [cal]l for action
+        if (message.startsWith("att") || message.startsWith("ann") || message.startsWith("cal")) {
+            actualMessage = message.substring(3);
+        }
+
+        // Get the first 3 characters of the message
         NotificationManager notificationManager = (NotificationManager)
                 context.getSystemService(Context.NOTIFICATION_SERVICE);
-        Notification notification = new Notification(icon, message, when);
+        Notification notification = new Notification(icon, actualMessage, when);
 
         String title = context.getString(R.string.app_name);
 
@@ -127,13 +144,25 @@ public class GCMIntentService extends GCMBaseIntentService {
                 Intent.FLAG_ACTIVITY_SINGLE_TOP);
         PendingIntent intent =
                 PendingIntent.getActivity(context, 0, notificationIntent, 0);
-        notification.setLatestEventInfo(context, title, message, intent);
+        notification.setLatestEventInfo(context, title, actualMessage, intent);
 
-        // Play default notification sound
-//        notification.defaults |= Notification.DEFAULT_SOUND;
-        notification.sound = Uri.parse("android.resource://" + context.getPackageName() + "/" + R.raw.sounddogs__war);
         notification.defaults = Notification.DEFAULT_LIGHTS | Notification.DEFAULT_VIBRATE;
-//        notification.flags |= Notification.FLAG_AUTO_CANCEL;
+        notification.flags |= Notification.FLAG_AUTO_CANCEL;
+
+        // Play specific notification sound
+        // "ann" - announcement message; "att" - attention message; "cal" - call to attack
+        if (message.startsWith("att")) { // this message is for attention
+            notification.sound = Uri.parse("android.resource://" +
+                    context.getPackageName() + "/" + R.raw.attention);
+        } else if (message.startsWith("ann")) { // This is an announcement
+            notification.sound = Uri.parse("android.resource://" +
+                    context.getPackageName() + "/" + R.raw.announcement);
+        } else if (message.startsWith("cal")) { // This is an call for attack
+            notification.sound = Uri.parse("android.resource://" +
+                    context.getPackageName() + "/" + R.raw.call_to_attack);
+        } else {
+            notification.defaults |= Notification.DEFAULT_SOUND;
+        }
 
 
         notification.defaults |= Notification.DEFAULT_VIBRATE;

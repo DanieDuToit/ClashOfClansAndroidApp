@@ -3,8 +3,10 @@ package biz.no_ip.danie_dutoit.clashofclans;
 import biz.no_ip.danie_dutoit.clashofclans.GCMConstants;
 import android.app.Activity;
 import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.support.v4.content.WakefulBroadcastReceiver;
 import android.util.Log;
 
 /**
@@ -16,6 +18,22 @@ import android.util.Log;
  * {@link GCMConstants#DEFAULT_INTENT_SERVICE_CLASS_NAME}. To use a new class,
  * the {@link #getGCMIntentServiceClassName(Context)} must be overridden.
  */
+
+//public class GCMBroadcastReceiver extends WakefulBroadcastReceiver {
+//
+//    @Override
+//    public void onReceive(Context context, Intent intent) {
+//
+//        // Explicitly specify that GcmMessageHandler will handle the intent.
+//        ComponentName comp = new ComponentName(context.getPackageName(),
+//                GCMMessageHandler.class.getName());
+//
+//        // Start the service, keeping the device awake while it is launching.
+//        startWakefulService(context, (intent.setComponent(comp)));
+//        setResultCode(Activity.RESULT_OK);
+//    }
+//}
+
 public class GCMBroadcastReceiver extends BroadcastReceiver {
 
     private static final String TAG = "GCMBroadcastReceiver";

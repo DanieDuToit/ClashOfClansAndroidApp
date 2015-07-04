@@ -117,16 +117,13 @@
             android:name=".GCMBroadcastReceiver"
             android:permission="com.google.android.c2dm.permission.SEND" >
             <intent-filter>
-
                 <!-- Receives the actual messages. -->
                 <action android:name="com.google.android.c2dm.intent.RECEIVE" />
                 <!-- Receives the registration id. -->
                 <action android:name="com.google.android.c2dm.intent.REGISTRATION" />
-
                 <category android:name="biz.no_ip.danie_dutoit.clashofclans" />
             </intent-filter>
         </receiver>
-
         <service android:name=".GCMIntentService" />
     </application>
 </manifest>
