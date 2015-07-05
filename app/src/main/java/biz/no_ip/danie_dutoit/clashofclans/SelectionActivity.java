@@ -62,40 +62,6 @@ public class SelectionActivity extends Activity {
     private List<String> web;
     private List<Integer> imageId;
 
-    //    String[] web = {"1", "2", "3", "4", "5", "6", "7", "8", "9", "10", // 0 is just a position holder
-    //            "11", "12", "13", "14", "15", "16", "17", "18", "19", "20",
-    //            "21", "22", "23", "24", "25"
-    //    };
-
-    //    int[] imageId = {
-    //            R.drawable.no_attack,
-    //            R.drawable.no_attack,
-    //            R.drawable.no_attack,
-    //            R.drawable.no_attack,
-    //            R.drawable.no_attack,
-    //            R.drawable.no_attack,
-    //            R.drawable.no_attack,
-    //            R.drawable.no_attack,
-    //            R.drawable.no_attack,
-    //            R.drawable.no_attack,
-    //            R.drawable.no_attack,
-    //            R.drawable.no_attack,
-    //            R.drawable.no_attack,
-    //            R.drawable.no_attack,
-    //            R.drawable.no_attack,
-    //            R.drawable.no_attack,
-    //            R.drawable.no_attack,
-    //            R.drawable.no_attack,
-    //            R.drawable.no_attack,
-    //            R.drawable.no_attack,
-    //            R.drawable.no_attack,
-    //            R.drawable.no_attack,
-    //            R.drawable.no_attack,
-    //            R.drawable.no_attack,
-    //            R.drawable.no_attack,
-    //
-    //    };
-
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -139,7 +105,9 @@ public class SelectionActivity extends Activity {
                     for (int key : keys) {
                         if (key == position) {
                             // do nothing
-                        } else {
+                        }
+                        else
+                        {
                             selectedRank = position + 1;
                             break;
                         }
@@ -502,7 +470,7 @@ public class SelectionActivity extends Activity {
             // The prefix "ann" below will cause the announcement sound to be for announcement
             queryParams.add(new BasicNameValuePair("message", "ann" + gs.getGameName() +
                     " are preparing to attack " +
-                    String.valueOf(selectedRank)));
+                    String.valueOf(gs.getTheirRank())));
             jsonStr = sh.makeServiceCall(gs.getInternetURL() + "GCM_sendGlobalNotification.php", ServiceHandler.POST, queryParams);
             Log.e("JSONString", jsonStr);
 
