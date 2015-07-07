@@ -179,8 +179,6 @@ public class MainActivity extends Activity implements View.OnClickListener, Adap
 //        }
 
 
-
-
         String versionName = "";
         try {
             final PackageInfo packageInfo = getPackageManager().getPackageInfo(getPackageName(), 0);
@@ -244,7 +242,8 @@ public class MainActivity extends Activity implements View.OnClickListener, Adap
             }
         });
 
-        new GetActiveWars().execute();
+        warsDownloader = new GetActiveWars();
+        warsDownloader.execute();
     }
 
     @Override
@@ -511,12 +510,33 @@ public class MainActivity extends Activity implements View.OnClickListener, Adap
                     gs.setWarName(selectedWar);
                     gs.setWarID(selectedWarID);
                 } catch (JSONException e) {
+                    // Dismiss the progress dialog
+                    if (pDialogWar.isShowing()) {
+                        pDialogWar.dismiss();
+                    }
+                    warsDownloader.cancel(true);
                     e.printStackTrace();
                 }
             } else {
                 Log.e("ServiceHandler", "Couldn't get any data from the url");
             }
             return null;
+        }
+
+        @Override
+        protected void onCancelled() {
+            super.onCancelled();
+            new AlertDialog.Builder(MainActivity.this)
+                    .setTitle("Result")
+                    .setMessage("An unknown network error occured. The program will close.")
+                    .setNegativeButton(android.R.string.no, new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int which) {
+                            android.os.Process.killProcess(android.os.Process.myPid());
+                            System.exit(1);
+                        }
+                    })
+                    .setIcon(android.R.drawable.ic_dialog_alert)
+                    .show();
         }
 
         @Override
