@@ -37,8 +37,8 @@ public class GlobalState extends Application {
 
     public String getInternetURL() {
 //		return "http://172.24.0.239/ClashOfClans/";
-		return "http://172.24.0.239:9001/ClashOfClans/";
-//        return "http://daniedutoit.no-ip.biz/ClashOfClans/";
+//		return "http://172.24.0.239:9001/ClashOfClans/";
+        return "http://daniedutoit.no-ip.biz/ClashOfClans/";
 //        return "http://10.0.0.6:9001/ClashOfClans/";
     }
 
