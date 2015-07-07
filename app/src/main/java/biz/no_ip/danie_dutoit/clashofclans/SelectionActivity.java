@@ -6,7 +6,6 @@ import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
-import android.graphics.Paint;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
@@ -41,7 +40,6 @@ public class SelectionActivity extends Activity {
     private ProgressDialog pIsPlayerAttacking;
     private ProgressDialog pStarsWon;
     private ProgressDialog pLockRank;
-    private HashMap<Integer, Integer> attacks;
     private HashMap<Integer, Integer> attacksDone;
     private HashMap<Integer, Integer> starsWonTable;
     private GetAttacksForPlayer attacksForPlayerDownLoader;
@@ -85,25 +83,27 @@ public class SelectionActivity extends Activity {
         isSomebodyAttackingUrl = gs.getInternetURL() + "get_IsAttackingRank.php";
         starsWonUrl = gs.getInternetURL() + "get_StarsWon.php";
         lockAttackUrl = gs.getInternetURL() + "set_RankAttacking.php";
-        attacks = new HashMap<>();
         attacksDone = new HashMap<>();
         starsWonTable = new HashMap<>();
 
         gameName = (TextView) findViewById(R.id.gameName);
         gameName.setText(gs.getGameName());
 
-        adapter = new CustomGrid(SelectionActivity.this, web, imageId, numberOfParticipants, attacks);
+        adapter = new CustomGrid(SelectionActivity.this, web, imageId, numberOfParticipants, attacksDone);
         grid = (GridView) findViewById(R.id.gridView);
         grid.setOnItemClickListener(new AdapterView.OnItemClickListener() {
 
             @Override
             public void onItemClick(AdapterView<?> parent, View view,
                                     int position, long id) {
+                selectedRank = 0;
                 if (starsWon < 2) { //Still have attack/s left
                     gs.setTheirRank(position + 1);
                     Set<Integer> keys = attacksDone.keySet();
+                    // Go through each of the ranks (keys) that was attacked by this player
+                    // and set the selectedRank to the first rank that is not in the list
                     for (int key : keys) {
-                        if (key == position) {
+                        if (key == position + 1) {
                             // do nothing
                         }
                         else
@@ -112,7 +112,8 @@ public class SelectionActivity extends Activity {
                             break;
                         }
                     }
-                    new IsSomebodyAttacking().execute();
+                    if (selectedRank != 0)
+                        new IsSomebodyAttacking().execute();
                 } // else Game Over
             }
         });
@@ -194,7 +195,7 @@ public class SelectionActivity extends Activity {
             String jsonStr = sh.makeServiceCall(attacksForPlayerUrl, ServiceHandler.POST, queryParams);
             Log.e("JSONString", jsonStr);
 
-            attacks.clear();
+            attacksDone.clear();
 
             if (jsonStr != null) {
                 try {
@@ -208,7 +209,7 @@ public class SelectionActivity extends Activity {
                     for (int i = 0; i < data.length(); i++) {
                         // Data node is JSON Object
                         JSONObject c = data.getJSONObject(i);
-                        attacks.put(c.getInt("TheirRank"), c.getInt("StarsTaken"));
+                        attacksDone.put(c.getInt("TheirRank"), c.getInt("StarsTaken"));
                     }
                 } catch (JSONException e) {
                     e.printStackTrace();
@@ -236,16 +237,16 @@ public class SelectionActivity extends Activity {
 //			if (pAttacksForPlayer.isShowing()) {
 //				pAttacksForPlayer.dismiss();
 //			}
-            if (attacks.size() == 2) {
+            if (attacksDone.size() == 2) {
                 TextView tv = (TextView) findViewById(R.id.tvRecommendedTargetMessageID);
-                tv.setText("You already made 2 attacks and will not be able to select an attack");
+                tv.setText("You already made 2 attacksDone and will not be able to select an attack");
                 tv.setTextColor(Color.RED);
             }
-            Set<Integer> keys = attacks.keySet();
+            Set<Integer> keys = attacksDone.keySet();
             for (int key : keys) {
                 if (key > 0) {
                     starsWon++;
-                    switch (attacks.get(key)) {
+                    switch (attacksDone.get(key)) {
                         case 0:
                             starsWonTable.put(key - 1, 0);
                             imageId.set(key - 1, R.drawable.zerostars);
@@ -426,8 +427,8 @@ public class SelectionActivity extends Activity {
 
             } else {
                 // Take the player to a page where he can input his score (stars taken)
-                // First "lock" the attacks
-                Toast.makeText(SelectionActivity.this, "You Clicked at " + web.get(selectedRank), Toast.LENGTH_SHORT).show();
+                // First "lock" the attacksDone
+//                Toast.makeText(SelectionActivity.this, "You Clicked at " + web.get(selectedRank), Toast.LENGTH_SHORT).show();
                 new LockAttack().execute();
             }
         }
