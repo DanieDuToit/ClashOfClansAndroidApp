@@ -59,6 +59,7 @@ public class MainActivity extends Activity implements View.OnClickListener, Adap
     private String getNumberOfParticipantsUrl = "";
     private String getParticipantNamesUrl = "";
     private String isSomebodyAttackingUrl = "";
+    private String getClanIDUrl = "";
     private ProgressDialog pDialogWar;
     private ProgressDialog pDialogNames;
     private ProgressDialog pIsPlayerAttacking;
@@ -148,38 +149,6 @@ public class MainActivity extends Activity implements View.OnClickListener, Adap
             GCMRegistrar.register(GlobalState.getAppContext(), GCMConfig.GOOGLE_SENDER_ID);
 
         }
-//        else {
-//
-//            // Try to register again, but not in the UI thread.
-//            // It's also necessary to cancel the thread onDestroy(),
-//            // hence the use of AsyncTask instead of a raw thread.
-//
-//            final Context context = this;
-//            mRegisterTask = new AsyncTask<Void, Void, Void>() {
-//
-//                @Override
-//                protected Void doInBackground(Void... params) {
-//
-//                    // Register on our server
-//                    // On server creates a new user
-//                    gs.register(context, name, email, regId);
-//
-//                    return null;
-//                }
-//
-//                @Override
-//                protected void onPostExecute(Void result) {
-//                    mRegisterTask = null;
-//                }
-//
-//            };
-//
-//            // execute AsyncTask
-//            mRegisterTask.execute(null, null, null);
-//        }
-
-
-
 
         String versionName = "";
         try {
@@ -204,6 +173,7 @@ public class MainActivity extends Activity implements View.OnClickListener, Adap
         getParticipantNamesUrl = gs.getInternetURL() + "get_participantsForWarFoApp.php";
         getNumberOfParticipantsUrl = gs.getInternetURL() + "get_NumberOfParticipants.php";
         isSomebodyAttackingUrl = gs.getInternetURL() + "get_IsAttackingRank.php";
+        getClanIDUrl = gs.getInternetURL() + "get_clanID.php";
         selectedWarID = 0;
 
         nameSpinner = (Spinner) findViewById(R.id.gameNameSpinner);
@@ -354,6 +324,7 @@ public class MainActivity extends Activity implements View.OnClickListener, Adap
             // Making a request to url and getting response
             List<NameValuePair> queryParams = new ArrayList<NameValuePair>();
             queryParams.add(new BasicNameValuePair("selectedWarID", selectedWarID.toString()));
+            queryParams.add(new BasicNameValuePair("clanID", gs.getClanID().toString()));
             String jsonStr = sh.makeServiceCall(getParticipantNamesUrl, ServiceHandler.POST, queryParams);
             Log.e("JSONString", jsonStr);
 
@@ -452,6 +423,15 @@ public class MainActivity extends Activity implements View.OnClickListener, Adap
             } else {
                 Log.e("ServiceHandler", "Couldn't get any data from the url");
             }
+
+//            // Send a push notification to announce the selection for an attack
+//            // The prefix "cal" below will cause the attention sound to be for a call for attack
+//            queryParams.add(new BasicNameValuePair("message", "cal" + gs.getGameName() +
+//                    " You must please prepeare for attack " +
+//                    String.valueOf(gs.getTheirRank())));
+//            jsonStr = sh.makeServiceCall(gs.getInternetURL() + "GCM_sendGlobalNotification.php", ServiceHandler.POST, queryParams);
+//            Log.e("JSONString", jsonStr);
+
             return null;
         }
 
@@ -608,6 +588,77 @@ public class MainActivity extends Activity implements View.OnClickListener, Adap
             List<NameValuePair> queryParams = new ArrayList<NameValuePair>();
             queryParams.add(new BasicNameValuePair("selectedWarID", gs.getWarID().toString()));
             String jsonStr = sh.makeServiceCall(isSomebodyAttackingUrl, ServiceHandler.POST, queryParams);
+            Log.e("JSONString", jsonStr);
+
+            if (jsonStr != null) {
+                try {
+                    JSONObject jsonObj = new JSONObject(jsonStr);
+
+                    // Getting JSON Array node
+                    data = jsonObj.getJSONArray("busyAttackingRank");
+                    // Will only be one result
+                    // Data node is JSON Object
+                    JSONObject c = data.getJSONObject(0);
+                    attackingRank = c.getInt("rank");
+                    attackingGameName = c.getString("gameName");
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            } else {
+                Log.e("ServiceHandler", "Couldn't get any data from the url");
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            // Showing progress dialog
+            pIsPlayerAttacking = new ProgressDialog(MainActivity.this);
+            pIsPlayerAttacking.setMessage("Checking if somebody else is attacking. Please wait...");
+            pIsPlayerAttacking.setCancelable(true);
+            pIsPlayerAttacking.show();
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            super.onPostExecute(aVoid);
+            // Dismiss the progress dialog
+            if (pIsPlayerAttacking.isShowing()) {
+                pIsPlayerAttacking.dismiss();
+            }
+            if (attackingRank > 0) {
+                if (attackingRank > 0) {
+                    // Display a message to say that someone else is busy with an attack and that the player should try again later
+                    new AlertDialog.Builder(MainActivity.this)
+                            .setTitle("Attack in progress")
+                            .setMessage("There is curently another attack in progress. Their Number " + attackingRank + " is being attacked by " + attackingGameName + ". Please try again in a few minutes time.")
+                            .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int which) {
+                                    // continue with delete
+                                }
+                            })
+                            .setIcon(android.R.drawable.ic_dialog_alert)
+                            .show();
+                }
+
+            } else {
+                Intent intent = new Intent("android.intent.action.SelectionActivity");
+                startActivity(intent);
+            }
+        }
+    }
+
+    private class GetClanID extends AsyncTask<Void, Void, Void> {
+        // Creating service handler class instance
+        ServiceHandler sh = new ServiceHandler();
+
+        @Override
+        protected Void doInBackground(Void... voids) {
+            // Making a request to url and getting response
+            List<NameValuePair> queryParams = new ArrayList<NameValuePair>();
+            queryParams.add(new BasicNameValuePair("androidID", gs.getAndroid_ID()));
+            String jsonStr = sh.makeServiceCall(getClanIDUrl, ServiceHandler.POST, queryParams);
             Log.e("JSONString", jsonStr);
 
             if (jsonStr != null) {

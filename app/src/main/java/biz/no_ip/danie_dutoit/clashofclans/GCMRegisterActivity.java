@@ -267,29 +267,6 @@ public class GCMRegisterActivity extends Activity implements GCMConfig {
         registrationId = GCMRegistrar.getRegistrationId(this);
         final String msg = "Device registered, registration ID=" + registrationId;
         txtViewRegistrationId.setText(msg + "\n");
-//        new AsyncTask<Void, Void, String>() {
-//            @Override
-//            protected String doInBackground(Void... params) {
-//                String msg = "";
-//                try {
-//                    if (gcm == null) {
-//                        gcm = GoogleCloudMessaging.getInstance(getApplicationContext());
-//                    }
-//                    registrationId = gcm.register(GOOGLE_SENDER_ID);
-//                    msg = "Device registered, registration ID=" + registrationId;
-//                    Log.i("GCM", msg);
-//
-//                } catch (IOException ex) {
-//                    msg = "Error :" + ex.getMessage();
-//
-//                }
-//                return msg;
-//            }
-//
-//            @Override
-//            protected void onPostExecute(String msg) {
-//                txtViewRegistrationId.setText(msg + "\n");
-//
                 final SaveGCMInfo downloader = new SaveGCMInfo();
                 downloader.execute();
                 Handler handler = new Handler();
@@ -333,6 +310,8 @@ public class GCMRegisterActivity extends Activity implements GCMConfig {
         protected Void doInBackground(Void... voids) {
             // Making a request to url and getting response
             List<NameValuePair> queryParams = new ArrayList<NameValuePair>();
+            queryParams.add(new BasicNameValuePair("fromApp", "1"));
+            queryParams.add(new BasicNameValuePair("selectedClanID", gs.getClanID().toString()));
             String jsonStr = sh.makeServiceCall(gs.getInternetURL() + "get_OurPlayers.php", ServiceHandler.POST, queryParams);
 
             Log.e("JSONString", jsonStr);

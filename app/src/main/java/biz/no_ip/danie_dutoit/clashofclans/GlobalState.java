@@ -9,7 +9,6 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.PowerManager;
 import android.util.Log;
-
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
@@ -19,11 +18,10 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Random;
+import android.provider.Settings.Secure;
 
 public class GlobalState extends Application {
 
-    private final int MAX_ATTEMPTS = 5;
-    private final int BACKOFF_MILLI_SECONDS = 2000;
     private final Random random = new Random();
     private Integer ourParticipantID;
     private Integer warID;
@@ -33,18 +31,22 @@ public class GlobalState extends Application {
     private String gameName;
     private Integer numberOfParticipants = 0;
     private PowerManager.WakeLock wakeLock;
+    private Integer clanID;
     private static Context context;
+    private static String android_id;
 
     public String getInternetURL() {
 //		return "http://172.24.0.239/ClashOfClans/";
 //		return "http://172.24.0.239:9001/ClashOfClans/";
-        return "http://daniedutoit.no-ip.biz/ClashOfClans/";
-//        return "http://10.0.0.6:9001/ClashOfClans/";
+//        return "http://daniedutoit.no-ip.biz/ClashOfClans/";
+        return "http://10.0.0.6:9001/ClashOfClans/";
+//        return "http://10.0.0.6/ClashOfClans/";
     }
 
     public void onCreate(){
         super.onCreate();
-        GlobalState.context = getApplicationContext();
+        context = getApplicationContext();
+        android_id = Secure.getString(context.getContentResolver(), Secure.ANDROID_ID);
     }
 
     public static Context getAppContext() {
@@ -115,6 +117,10 @@ public class GlobalState extends Application {
         }
     }
 
+    public String getAndroid_ID() {
+        return android_id;
+    }
+
     public Integer getOurParticipantID() {
         return ourParticipantID;
     }
@@ -131,10 +137,17 @@ public class GlobalState extends Application {
         this.numberOfParticipants = numberOfParticipants;
     }
 
+    public Integer getClanID() {
+        //TODO Remove hardcoded value
+        return 1;
+    }
+    public void setClanID(Integer clanID) {
+        this.clanID = clanID;
+    }
+
     public Integer getRank() {
         return rank;
     }
-
     public void setRank(Integer rank) {
         this.rank = rank;
     }
@@ -142,7 +155,6 @@ public class GlobalState extends Application {
     public Integer getTheirRank() {
         return theirRank;
     }
-
     public void setTheirRank(Integer theirRank) {
         this.theirRank = theirRank;
     }
@@ -150,7 +162,6 @@ public class GlobalState extends Application {
     public Integer getWarID() {
         return warID;
     }
-
     public void setWarID(Integer warid) {
         this.warID = warid;
     }
@@ -158,7 +169,6 @@ public class GlobalState extends Application {
     public String getGameName() {
         return gameName;
     }
-
     public void setGameName(String gamename) {
         this.gameName = gamename;
     }
@@ -166,7 +176,6 @@ public class GlobalState extends Application {
     public String getWarName() {
         return warName;
     }
-
     public void setWarName(String warname) {
         this.warName = warname;
     }
@@ -175,7 +184,9 @@ public class GlobalState extends Application {
         String serverUrl = getInternetURL() + "GCM_sendGlobalNotification.php";
         Map<String, String> params = new HashMap<String, String>();
         params.put("message", message);
+        int BACKOFF_MILLI_SECONDS = 2000;
         long backoff = BACKOFF_MILLI_SECONDS + random.nextInt(1000);
+        int MAX_ATTEMPTS = 5;
         for (int i = 1; i <= MAX_ATTEMPTS; i++) {
             Log.d(GCMConfig.TAG, "Attempt #" + i + " to register");
             try {
