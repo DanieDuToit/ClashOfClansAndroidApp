@@ -45,7 +45,7 @@ public class GCMRegisterActivity extends Activity implements GCMConfig {
     AsyncTask<Void, Void, Void> mRegisterTask;
     // Register buttons
     Button btnRegister;
-    Button btnSaveRegistration;
+//    Button btnSaveRegistration;
     ArrayList<String> gameNamesList = new ArrayList<>();
     ArrayList<Integer> playerIDs = new ArrayList<>();
     JSONArray data = null;
@@ -134,7 +134,7 @@ public class GCMRegisterActivity extends Activity implements GCMConfig {
 //        txtName = (EditText) findViewById(R.id.txtName);
         txtEmail = (EditText) findViewById(R.id.txtEmail);
         btnRegister = (Button) findViewById(R.id.btnRegister);
-        btnSaveRegistration = (Button) findViewById(R.id.btnSaveRegistration);
+//        btnSaveRegistration = (Button) findViewById(R.id.btnSaveRegistration);
         txtViewRegistrationId = (TextView) findViewById(R.id.txtViewRegistrationId);
         gameNameSpinner = (Spinner) findViewById(R.id.gameNameSpinner);
 
@@ -226,41 +226,41 @@ public class GCMRegisterActivity extends Activity implements GCMConfig {
             }
         });
 
-        btnSaveRegistration.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                final SaveGCMInfo downloader = new SaveGCMInfo();
-                downloader.execute();
-                Handler handler = new Handler();
-                handler.postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        if (downloader.getStatus() == AsyncTask.Status.RUNNING) {
-                            downloader.cancel(true);
-                            if (pDialog.isShowing()) {
-                                pDialog.dismiss();
-                            }
-                            new AlertDialog.Builder(GCMRegisterActivity.this)
-                                    .setTitle("Result")
-                                    .setMessage("Internet connection timed out. Try again?")
-                                    .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
-                                        public void onClick(DialogInterface dialog, int which) {
-                                            btnSaveRegistration.performClick();
-                                        }
-                                    })
-                                    .setNegativeButton(android.R.string.no, new DialogInterface.OnClickListener() {
-                                        public void onClick(DialogInterface dialog, int which) {
-                                            android.os.Process.killProcess(android.os.Process.myPid());
-                                            System.exit(1);
-                                        }
-                                    })
-                                    .setIcon(android.R.drawable.ic_dialog_alert)
-                                    .show();
-                        }
-                    }
-                }, 60000);
-            }
-        });
+//        btnSaveRegistration.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                final SaveGCMInfo downloader = new SaveGCMInfo();
+//                downloader.execute();
+//                Handler handler = new Handler();
+//                handler.postDelayed(new Runnable() {
+//                    @Override
+//                    public void run() {
+//                        if (downloader.getStatus() == AsyncTask.Status.RUNNING) {
+//                            downloader.cancel(true);
+//                            if (pDialog.isShowing()) {
+//                                pDialog.dismiss();
+//                            }
+//                            new AlertDialog.Builder(GCMRegisterActivity.this)
+//                                    .setTitle("Result")
+//                                    .setMessage("Internet connection timed out. Try again?")
+//                                    .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+//                                        public void onClick(DialogInterface dialog, int which) {
+//                                            btnSaveRegistration.performClick();
+//                                        }
+//                                    })
+//                                    .setNegativeButton(android.R.string.no, new DialogInterface.OnClickListener() {
+//                                        public void onClick(DialogInterface dialog, int which) {
+//                                            android.os.Process.killProcess(android.os.Process.myPid());
+//                                            System.exit(1);
+//                                        }
+//                                    })
+//                                    .setIcon(android.R.drawable.ic_dialog_alert)
+//                                    .show();
+//                        }
+//                    }
+//                }, 60000);
+//            }
+//        });
     }
 
     public void getRegId() {
@@ -283,7 +283,7 @@ public class GCMRegisterActivity extends Activity implements GCMConfig {
                                     .setMessage("Internet connection timed out. Try again?")
                                     .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
                                         public void onClick(DialogInterface dialog, int which) {
-                                            btnSaveRegistration.performClick();
+                                            btnRegister.performClick();
                                         }
                                     })
                                     .setNegativeButton(android.R.string.no, new DialogInterface.OnClickListener() {

@@ -423,15 +423,6 @@ public class MainActivity extends Activity implements View.OnClickListener, Adap
             } else {
                 Log.e("ServiceHandler", "Couldn't get any data from the url");
             }
-
-//            // Send a push notification to announce the selection for an attack
-//            // The prefix "cal" below will cause the attention sound to be for a call for attack
-//            queryParams.add(new BasicNameValuePair("message", "cal" + gs.getGameName() +
-//                    " You must please prepeare for attack " +
-//                    String.valueOf(gs.getTheirRank())));
-//            jsonStr = sh.makeServiceCall(gs.getInternetURL() + "GCM_sendGlobalNotification.php", ServiceHandler.POST, queryParams);
-//            Log.e("JSONString", jsonStr);
-
             return null;
         }
 
@@ -491,12 +482,33 @@ public class MainActivity extends Activity implements View.OnClickListener, Adap
                     gs.setWarName(selectedWar);
                     gs.setWarID(selectedWarID);
                 } catch (JSONException e) {
+                    // Dismiss the progress dialog
+                    if (pDialogWar.isShowing()) {
+                        pDialogWar.dismiss();
+                    }
+                    warsDownloader.cancel(true);
                     e.printStackTrace();
                 }
             } else {
                 Log.e("ServiceHandler", "Couldn't get any data from the url");
             }
             return null;
+        }
+
+        @Override
+        protected void onCancelled() {
+            super.onCancelled();
+            new AlertDialog.Builder(MainActivity.this)
+                    .setTitle("Result")
+                    .setMessage("An unknown network error occured. The program will close.")
+                    .setNegativeButton(android.R.string.no, new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int which) {
+                            android.os.Process.killProcess(android.os.Process.myPid());
+                            System.exit(1);
+                        }
+                    })
+                    .setIcon(android.R.drawable.ic_dialog_alert)
+                    .show();
         }
 
         @Override
@@ -588,77 +600,6 @@ public class MainActivity extends Activity implements View.OnClickListener, Adap
             List<NameValuePair> queryParams = new ArrayList<NameValuePair>();
             queryParams.add(new BasicNameValuePair("selectedWarID", gs.getWarID().toString()));
             String jsonStr = sh.makeServiceCall(isSomebodyAttackingUrl, ServiceHandler.POST, queryParams);
-            Log.e("JSONString", jsonStr);
-
-            if (jsonStr != null) {
-                try {
-                    JSONObject jsonObj = new JSONObject(jsonStr);
-
-                    // Getting JSON Array node
-                    data = jsonObj.getJSONArray("busyAttackingRank");
-                    // Will only be one result
-                    // Data node is JSON Object
-                    JSONObject c = data.getJSONObject(0);
-                    attackingRank = c.getInt("rank");
-                    attackingGameName = c.getString("gameName");
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-            } else {
-                Log.e("ServiceHandler", "Couldn't get any data from the url");
-            }
-            return null;
-        }
-
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-            // Showing progress dialog
-            pIsPlayerAttacking = new ProgressDialog(MainActivity.this);
-            pIsPlayerAttacking.setMessage("Checking if somebody else is attacking. Please wait...");
-            pIsPlayerAttacking.setCancelable(true);
-            pIsPlayerAttacking.show();
-        }
-
-        @Override
-        protected void onPostExecute(Void aVoid) {
-            super.onPostExecute(aVoid);
-            // Dismiss the progress dialog
-            if (pIsPlayerAttacking.isShowing()) {
-                pIsPlayerAttacking.dismiss();
-            }
-            if (attackingRank > 0) {
-                if (attackingRank > 0) {
-                    // Display a message to say that someone else is busy with an attack and that the player should try again later
-                    new AlertDialog.Builder(MainActivity.this)
-                            .setTitle("Attack in progress")
-                            .setMessage("There is curently another attack in progress. Their Number " + attackingRank + " is being attacked by " + attackingGameName + ". Please try again in a few minutes time.")
-                            .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
-                                public void onClick(DialogInterface dialog, int which) {
-                                    // continue with delete
-                                }
-                            })
-                            .setIcon(android.R.drawable.ic_dialog_alert)
-                            .show();
-                }
-
-            } else {
-                Intent intent = new Intent("android.intent.action.SelectionActivity");
-                startActivity(intent);
-            }
-        }
-    }
-
-    private class GetClanID extends AsyncTask<Void, Void, Void> {
-        // Creating service handler class instance
-        ServiceHandler sh = new ServiceHandler();
-
-        @Override
-        protected Void doInBackground(Void... voids) {
-            // Making a request to url and getting response
-            List<NameValuePair> queryParams = new ArrayList<NameValuePair>();
-            queryParams.add(new BasicNameValuePair("androidID", gs.getAndroid_ID()));
-            String jsonStr = sh.makeServiceCall(getClanIDUrl, ServiceHandler.POST, queryParams);
             Log.e("JSONString", jsonStr);
 
             if (jsonStr != null) {
