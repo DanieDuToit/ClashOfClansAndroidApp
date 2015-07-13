@@ -70,7 +70,7 @@ public class StarsLeftToBeWinActivity extends Activity {
         protected Void doInBackground(Void... params) {
             List<NameValuePair> queryParams = new ArrayList<NameValuePair>();
             queryParams.add(new BasicNameValuePair("selectedWarID", gs.getWarID().toString()));
-            String jsonStr = sh.makeServiceCall(gs.getInternetURL() + "get_StarsToBeWin.php", ServiceHandler.POST, queryParams);
+            String jsonStr = sh.makeServiceCall(GlobalState.getInternetURL() + "get_StarsToBeWin.php", ServiceHandler.POST, queryParams);
             Log.e("JSONString", jsonStr);
 
             if (jsonStr != null) {

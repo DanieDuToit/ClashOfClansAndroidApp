@@ -50,26 +50,16 @@ public class MainActivity extends Activity implements View.OnClickListener, Adap
     String selectedGameName;
     String selectedWar;
     Integer selectedWarID;
-    GetParticipantsForWar participantsDownloader;
     GetActiveWars warsDownloader;
     ArrayAdapter<String> NamesDataAdapter;
     ArrayAdapter<String> NextAttackersAdapter;
-    ProgressDialog pDialogNumParticipants;
-    private String getWarsUrl = "";
-    private String getNumberOfParticipantsUrl = "";
-    private String getParticipantNamesUrl = "";
-    private String isSomebodyAttackingUrl = "";
-    private String getClanIDUrl = "";
     private ProgressDialog pDialogWar;
     private ProgressDialog pDialogNames;
     private ProgressDialog pIsPlayerAttacking;
-    private int prevWarID = 0;
     private int attackingRank = 0;
     private String attackingGameName = "";
-    private ProgressBar pb;
     private Spinner recommendedNextAttackersSpinner;
     private String warDate = "";
-    private Integer selectedRank = 0;
     private GlobalState gs;
     private TextView lblMessage;
     private ScrollView svMessages;
@@ -169,11 +159,7 @@ public class MainActivity extends Activity implements View.OnClickListener, Adap
         refreshNextAttackerListBtn.setOnClickListener(this);
         svMessages = (ScrollView) findViewById(R.id.svPushNotifications);
 
-        getWarsUrl = gs.getInternetURL() + "GetActiveWars.php";
-        getParticipantNamesUrl = gs.getInternetURL() + "get_participantsForWarFoApp.php";
-        getNumberOfParticipantsUrl = gs.getInternetURL() + "get_NumberOfParticipants.php";
-        isSomebodyAttackingUrl = gs.getInternetURL() + "get_IsAttackingRank.php";
-        getClanIDUrl = gs.getInternetURL() + "get_clanID.php";
+//        getWarsUrl = GlobalState.getInternetURL() + "GetActiveWars.php";
         selectedWarID = 0;
 
         nameSpinner = (Spinner) findViewById(R.id.gameNameSpinner);
@@ -324,8 +310,8 @@ public class MainActivity extends Activity implements View.OnClickListener, Adap
             // Making a request to url and getting response
             List<NameValuePair> queryParams = new ArrayList<NameValuePair>();
             queryParams.add(new BasicNameValuePair("selectedWarID", selectedWarID.toString()));
-            queryParams.add(new BasicNameValuePair("clanID", gs.getClanID().toString()));
-            String jsonStr = sh.makeServiceCall(getParticipantNamesUrl, ServiceHandler.POST, queryParams);
+            queryParams.add(new BasicNameValuePair("clanID", GlobalState.getClanID().toString()));
+            String jsonStr = sh.makeServiceCall(GlobalState.getInternetURL() + "get_participantsForWarFoApp.php", ServiceHandler.POST, queryParams);
             Log.e("JSONString", jsonStr);
 
             gameNamesList.clear();
@@ -394,7 +380,7 @@ public class MainActivity extends Activity implements View.OnClickListener, Adap
             // Making a request to url and getting response
             List<NameValuePair> queryParams = new ArrayList<NameValuePair>();
             queryParams.add(new BasicNameValuePair("selectedWarID", selectedWarID.toString()));
-            String jsonStr = sh.makeServiceCall(gs.getInternetURL() + "get_orderOfAttacks.php", ServiceHandler.POST, queryParams);
+            String jsonStr = sh.makeServiceCall(GlobalState.getInternetURL() + "get_orderOfAttacks.php", ServiceHandler.POST, queryParams);
             Log.e("JSONString", jsonStr);
 
             nextAttackerNames.clear();
@@ -409,7 +395,7 @@ public class MainActivity extends Activity implements View.OnClickListener, Adap
 
                     // Gert the first rank to set the gameNane list to the same
                     JSONObject c = data.getJSONObject(0);
-                    selectedRank = c.getInt("OurRank");
+                    Integer selectedRank = c.getInt("OurRank");
 
                     // looping through All Contacts
                     for (int i = 0; i < data.length(); i++) {
@@ -462,8 +448,8 @@ public class MainActivity extends Activity implements View.OnClickListener, Adap
         protected Void doInBackground(Void... voids) {
             // Making a request to url and getting response
             List<NameValuePair> queryParams = new ArrayList<NameValuePair>();
-            queryParams.add(new BasicNameValuePair("dummy", ""));
-            String jsonStr = sh.makeServiceCall(getWarsUrl, ServiceHandler.POST, queryParams);
+            queryParams.add(new BasicNameValuePair("clanID", GlobalState.getClanID().toString()));
+            String jsonStr = sh.makeServiceCall(GlobalState.getInternetURL() + "GetActiveWars.php", ServiceHandler.POST, queryParams);
             //            Log.e("JSONString", jsonStr);
 
             if (jsonStr != null) {
@@ -542,7 +528,7 @@ public class MainActivity extends Activity implements View.OnClickListener, Adap
             List<NameValuePair> queryParams = new ArrayList<NameValuePair>();
             queryParams.add(new BasicNameValuePair("WarID", (warID)));
 
-            String jsonStr = sh.makeServiceCall(getNumberOfParticipantsUrl, ServiceHandler.POST, queryParams);
+            String jsonStr = sh.makeServiceCall(GlobalState.getInternetURL() + "get_NumberOfParticipants.php", ServiceHandler.POST, queryParams);
             Log.e("JSONString", jsonStr);
             if (jsonStr != null) {
                 try {
@@ -599,7 +585,7 @@ public class MainActivity extends Activity implements View.OnClickListener, Adap
             // Making a request to url and getting response
             List<NameValuePair> queryParams = new ArrayList<NameValuePair>();
             queryParams.add(new BasicNameValuePair("selectedWarID", gs.getWarID().toString()));
-            String jsonStr = sh.makeServiceCall(isSomebodyAttackingUrl, ServiceHandler.POST, queryParams);
+            String jsonStr = sh.makeServiceCall(GlobalState.getInternetURL() + "get_IsAttackingRank.php", ServiceHandler.POST, queryParams);
             Log.e("JSONString", jsonStr);
 
             if (jsonStr != null) {

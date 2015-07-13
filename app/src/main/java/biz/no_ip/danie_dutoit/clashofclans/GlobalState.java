@@ -31,15 +31,19 @@ public class GlobalState extends Application {
     private String gameName;
     private Integer numberOfParticipants = 0;
     private PowerManager.WakeLock wakeLock;
-    private Integer clanID;
     private static Context context;
     private static String android_id;
 
-    public String getInternetURL() {
+    public static Integer getClanID() {
+        // The ClanID will be hardcoded for each Clan
+        return 2; // DragonHeart's Clan ID
+    }
+
+    public static String getInternetURL() {
 //		return "http://172.24.0.239/ClashOfClans/";
-//		return "http://172.24.0.239:9001/ClashOfClans/";
+		return "http://172.24.0.239:9001/ClashOfClans/";
 //        return "http://daniedutoit.no-ip.biz/ClashOfClans/";
-        return "http://10.0.0.6:9001/ClashOfClans/";
+//        return "http://10.0.0.6:9001/ClashOfClans/";
 //        return "http://10.0.0.6/ClashOfClans/";
     }
 
@@ -137,14 +141,6 @@ public class GlobalState extends Application {
         this.numberOfParticipants = numberOfParticipants;
     }
 
-    public Integer getClanID() {
-        //TODO Remove hardcoded value
-        return 1;
-    }
-    public void setClanID(Integer clanID) {
-        this.clanID = clanID;
-    }
-
     public Integer getRank() {
         return rank;
     }
@@ -180,10 +176,11 @@ public class GlobalState extends Application {
         this.warName = warname;
     }
 
-    void sendGlobalNotification(final Context context, String message) {
+    public void sendGlobalNotification(String message) {
         String serverUrl = getInternetURL() + "GCM_sendGlobalNotification.php";
         Map<String, String> params = new HashMap<String, String>();
         params.put("message", message);
+        params.put("clanID", this.getClanID().toString());
         int BACKOFF_MILLI_SECONDS = 2000;
         long backoff = BACKOFF_MILLI_SECONDS + random.nextInt(1000);
         int MAX_ATTEMPTS = 5;

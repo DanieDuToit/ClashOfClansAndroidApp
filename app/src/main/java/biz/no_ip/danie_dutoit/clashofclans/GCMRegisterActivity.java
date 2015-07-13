@@ -311,8 +311,8 @@ public class GCMRegisterActivity extends Activity implements GCMConfig {
             // Making a request to url and getting response
             List<NameValuePair> queryParams = new ArrayList<NameValuePair>();
             queryParams.add(new BasicNameValuePair("fromApp", "1"));
-            queryParams.add(new BasicNameValuePair("selectedClanID", gs.getClanID().toString()));
-            String jsonStr = sh.makeServiceCall(gs.getInternetURL() + "get_OurPlayers.php", ServiceHandler.POST, queryParams);
+            queryParams.add(new BasicNameValuePair("clanID", GlobalState.getClanID().toString()));
+            String jsonStr = sh.makeServiceCall(GlobalState.getInternetURL() + "get_OurPlayers.php", ServiceHandler.POST, queryParams);
 
             Log.e("JSONString", jsonStr);
 
@@ -377,7 +377,8 @@ public class GCMRegisterActivity extends Activity implements GCMConfig {
             queryParams.add(new BasicNameValuePair("gameName", gameName));
             queryParams.add(new BasicNameValuePair("email", txtEmail.getText().toString()));
             queryParams.add(new BasicNameValuePair("gcmRegistrationId", registrationId));
-            String jsonStr = sh.makeServiceCall(gs.getInternetURL() + "save_GCMInfo.php", ServiceHandler.POST, queryParams);
+            queryParams.add(new BasicNameValuePair("clanID", GlobalState.getClanID().toString()));
+            String jsonStr = sh.makeServiceCall(GlobalState.getInternetURL() + "save_GCMInfo.php", ServiceHandler.POST, queryParams);
 
             Log.e("JSONString", jsonStr);
 

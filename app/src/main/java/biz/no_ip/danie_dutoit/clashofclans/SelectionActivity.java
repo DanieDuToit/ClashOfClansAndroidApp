@@ -30,9 +30,6 @@ import java.util.Set;
  * Created by Danie on 2015/06/03.
  */
 public class SelectionActivity extends Activity {
-    String attacksForPlayerUrl;
-    String starsWonUrl;
-    String bestAttackForPlayerUrl;
     GridView grid;
     JSONArray data = null;
     private ProgressDialog pAttacksForPlayer;
@@ -50,8 +47,6 @@ public class SelectionActivity extends Activity {
     private int numberOfAttacks = 0;
     private int starsWon = 0;
     private int nextBestAttack = 0;
-    private String isSomebodyAttackingUrl = "";
-    private String lockAttackUrl = "";
     private int attackingRank = 0;
     private String attackingGameName = "";
     private int selectedRank = 0;
@@ -78,11 +73,6 @@ public class SelectionActivity extends Activity {
         }
 
         int numberOfParticipants = gs.getNumberOfParticipants();
-        attacksForPlayerUrl = gs.getInternetURL() + "get_AttacksForPlayer.php";
-        bestAttackForPlayerUrl = gs.getInternetURL() + "get_NextBestAttack.php";
-        isSomebodyAttackingUrl = gs.getInternetURL() + "get_IsAttackingRank.php";
-        starsWonUrl = gs.getInternetURL() + "get_StarsWon.php";
-        lockAttackUrl = gs.getInternetURL() + "set_RankAttacking.php";
         attacksDone = new HashMap<>();
         starsWonTable = new HashMap<>();
 
@@ -132,7 +122,7 @@ public class SelectionActivity extends Activity {
             List<NameValuePair> queryParams = new ArrayList<NameValuePair>();
             queryParams.add(new BasicNameValuePair("selectedWarID", gs.getWarID().toString()));
             queryParams.add(new BasicNameValuePair("rank", gs.getRank().toString()));
-            String jsonStr = sh.makeServiceCall(bestAttackForPlayerUrl, ServiceHandler.POST, queryParams);
+            String jsonStr = sh.makeServiceCall(GlobalState.getInternetURL() + "get_NextBestAttack.php", ServiceHandler.POST, queryParams);
             Log.e("JSONString", jsonStr);
 
             if (jsonStr != null) {
@@ -192,7 +182,8 @@ public class SelectionActivity extends Activity {
             List<NameValuePair> queryParams = new ArrayList<NameValuePair>();
             queryParams.add(new BasicNameValuePair("selectedWarID", gs.getWarID().toString()));
             queryParams.add(new BasicNameValuePair("OurParticipantID", gs.getOurParticipantID().toString()));
-            String jsonStr = sh.makeServiceCall(attacksForPlayerUrl, ServiceHandler.POST, queryParams);
+
+            String jsonStr = sh.makeServiceCall(GlobalState.getInternetURL() + "get_AttacksForPlayer.php", ServiceHandler.POST, queryParams);
             Log.e("JSONString", jsonStr);
 
             attacksDone.clear();
@@ -279,7 +270,7 @@ public class SelectionActivity extends Activity {
             // Making a request to url and getting response
             List<NameValuePair> queryParams = new ArrayList<NameValuePair>();
             queryParams.add(new BasicNameValuePair("selectedWarID", gs.getWarID().toString()));
-            String jsonStr = sh.makeServiceCall(starsWonUrl, ServiceHandler.POST, queryParams);
+            String jsonStr = sh.makeServiceCall(GlobalState.getInternetURL() + "get_StarsWon.php", ServiceHandler.POST, queryParams);
             Log.e("JSONString", jsonStr);
 
             starsWonTable.clear();
@@ -370,7 +361,7 @@ public class SelectionActivity extends Activity {
             // Making a request to url and getting response
             List<NameValuePair> queryParams = new ArrayList<NameValuePair>();
             queryParams.add(new BasicNameValuePair("selectedWarID", gs.getWarID().toString()));
-            String jsonStr = sh.makeServiceCall(isSomebodyAttackingUrl, ServiceHandler.POST, queryParams);
+            String jsonStr = sh.makeServiceCall(GlobalState.getInternetURL() + "get_IsAttackingRank.php", ServiceHandler.POST, queryParams);
             Log.e("JSONString", jsonStr);
 
             if (jsonStr != null) {
@@ -445,7 +436,7 @@ public class SelectionActivity extends Activity {
             queryParams.add(new BasicNameValuePair("selectedWarID", gs.getWarID().toString()));
             queryParams.add(new BasicNameValuePair("ourParticipantID", gs.getOurParticipantID().toString()));
             queryParams.add(new BasicNameValuePair("rank", String.valueOf(selectedRank)));
-            String jsonStr = sh.makeServiceCall(lockAttackUrl, ServiceHandler.POST, queryParams);
+            String jsonStr = sh.makeServiceCall(GlobalState.getInternetURL() + "set_RankAttacking.php", ServiceHandler.POST, queryParams);
             Log.e("JSONString", jsonStr);
 
             if (jsonStr != null) {
@@ -465,16 +456,19 @@ public class SelectionActivity extends Activity {
                 Log.e("ServiceHandler", "Couldn't get any data from the url");
             }
 
-            queryParams.clear();
+            String message = "ann" + gs.getGameName() + " are preparing to attack " +
+                    gs.getTheirRank().toString();
+            gs.sendGlobalNotification(message);
 
-            // Send a push notofocation to announce the selection for an attack
-            // The prefix "ann" below will cause the announcement sound to be for announcement
-            queryParams.add(new BasicNameValuePair("message", "ann" + gs.getGameName() +
-                    " are preparing to attack " +
-                    String.valueOf(gs.getTheirRank())));
-            jsonStr = sh.makeServiceCall(gs.getInternetURL() + "GCM_sendGlobalNotification.php", ServiceHandler.POST, queryParams);
-            Log.e("JSONString", jsonStr);
-
+//            queryParams.clear();
+//            // Send a push notofocation to announce the selection for an attack
+//            // The prefix "ann" below will cause the announcement sound to be for announcement
+//            queryParams.add(new BasicNameValuePair("message", "ann" + gs.getGameName() +
+//                    " are preparing to attack " +
+//                    String.valueOf(gs.getTheirRank())));
+//            jsonStr = sh.makeServiceCall(GlobalState.getInternetURL() + "GCM_sendGlobalNotification.php", ServiceHandler.POST, queryParams);
+//            Log.e("JSONString", jsonStr);
+//
             return null;
         }
 
