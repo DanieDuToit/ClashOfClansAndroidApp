@@ -42,8 +42,6 @@ public class SelectResultActivity extends Activity {
             R.drawable.twostar,
             R.drawable.threestars
     };
-    private String unLockAttackUrl;
-    private String setScoreUrl;
     private SelectResultCustomGrid adapter;
 
     @Override
@@ -52,9 +50,6 @@ public class SelectResultActivity extends Activity {
         setContentView(R.layout.select_result);
 
         gs = (GlobalState) getApplicationContext();
-
-        unLockAttackUrl = gs.getInternetURL() + "removeAttackLock.php";
-        setScoreUrl = gs.getInternetURL() + "update_ourAttackForApp.php";
 
         TextView tv = (TextView) findViewById(R.id.tvSelectPrompt);
         tv.setText("Please Select the stars you took from Rank # " + gs.getTheirRank());
@@ -104,7 +99,7 @@ public class SelectResultActivity extends Activity {
             // Making a request to url and getting response
             List<NameValuePair> queryParams = new ArrayList<NameValuePair>();
             queryParams.add(new BasicNameValuePair("selectedWarID", gs.getWarID().toString()));
-            String jsonStr = sh.makeServiceCall(unLockAttackUrl, ServiceHandler.POST, queryParams);
+            String jsonStr = sh.makeServiceCall(GlobalState.getInternetURL() + "removeAttackLock.php", ServiceHandler.POST, queryParams);
             Log.e("JSONString", jsonStr);
 
             if (jsonStr != null) {
@@ -165,7 +160,7 @@ public class SelectResultActivity extends Activity {
             queryParams.add(new BasicNameValuePair("ourparticipantid", gs.getOurParticipantID().toString()));
             queryParams.add(new BasicNameValuePair("starstaken", String.valueOf(starstaken)));
             queryParams.add(new BasicNameValuePair("theirRank", gs.getTheirRank().toString()));
-            String jsonStr = sh.makeServiceCall(setScoreUrl, ServiceHandler.POST, queryParams);
+            String jsonStr = sh.makeServiceCall(GlobalState.getInternetURL() + "update_ourAttackForApp.php", ServiceHandler.POST, queryParams);
 
             Log.e("JSONString", jsonStr);
 
@@ -179,17 +174,21 @@ public class SelectResultActivity extends Activity {
                 Log.e("ServiceHandler", "Couldn't get any data from the url");
             }
 
-            queryParams.clear();
-            // The prefix "ann" below will cause the announcement sound to be for announcement
-            queryParams.add(new BasicNameValuePair("message", "ann" + gs.getGameName() +
-                    " just scored " +
-                    String.valueOf(starstaken) +
-                    " stars agains " +
-                    String.valueOf(theirRank)));
-            jsonStr = sh.makeServiceCall(gs.getInternetURL() + "GCM_sendGlobalNotification.php", ServiceHandler.POST, queryParams);
+            String message = "ann" + gs.getGameName() + " just scored " + String.valueOf(starstaken) +
+                    " stars agains " + String.valueOf(theirRank);
+            gs.sendGlobalNotification(message);
 
-            Log.e("JSONString", jsonStr);
-
+//            queryParams.clear();
+//            // The prefix "ann" below will cause the announcement sound to be for announcement
+//            queryParams.add(new BasicNameValuePair("message", "ann" + gs.getGameName() +
+//                    " just scored " +
+//                    String.valueOf(starstaken) +
+//                    " stars agains " +
+//                    String.valueOf(theirRank)));
+//            jsonStr = sh.makeServiceCall(GlobalState.getInternetURL() + "GCM_sendGlobalNotification.php", ServiceHandler.POST, queryParams);
+//
+//            Log.e("JSONString", jsonStr);
+//
             return null;
         }
 

@@ -57,6 +57,12 @@
                 android:layout_height="wrap_content"
                 android:spinnerMode="dropdown" />
 
+            <Button
+                android:id="@+id/submit"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Submit" />
+
             <TextView
                 android:id="@+id/textView4"
                 android:layout_width="wrap_content"
@@ -70,23 +76,11 @@
                 android:layout_height="wrap_content"
                 android:spinnerMode="dropdown" />
 
-            <LinearLayout
-                android:layout_width="match_parent"
+            <Button
+                android:id="@+id/btnRefreshAttackersList"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal">
-
-                <Button
-                    android:id="@+id/submit"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Submit" />
-
-                <Button
-                    android:id="@+id/btnRefreshAttackersList"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Refresh Next Attackers list" />
-            </LinearLayout>
+                android:text="Refresh Next Attackers list" />
 
         </LinearLayout>
     </ScrollView>
