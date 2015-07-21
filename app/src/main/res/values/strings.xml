@@ -25,5 +25,12 @@
     <string name="options_clear">Clear</string>
     <string name="options_exit">Exit</string>
     <string name="sending_push_notification">Sending a pushnotification to (%1$s).</string>
+    <string name="menu_setupGCM">Setup GCM</string>
+    <string name="mainMenu_Stats">Stats</string>
+    <string name="subMenu_warProgress">War Progress</string>
+    <string name="subMenu_UsVsThem">Us VS Them</string>
+    <string name="SubMenu_starsLeft">Stars Left</string>
+    <string name="mainMenu_admin">Admin</string>
+    <string name="subMenu_unlockPlayer">Unlock Attack</string>
 
 </resources>

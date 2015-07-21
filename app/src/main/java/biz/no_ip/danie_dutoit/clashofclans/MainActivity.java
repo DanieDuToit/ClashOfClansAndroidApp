@@ -15,7 +15,9 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.SubMenu;
 import android.view.View;
 import android.widget.*;
 
@@ -63,6 +65,14 @@ public class MainActivity extends Activity implements View.OnClickListener, Adap
     private GlobalState gs;
     private TextView lblMessage;
     private ScrollView svMessages;
+
+    private static final int MENU_SETUP_GCM = 0;
+    private static final int MENU_STATS = 1;
+    private static final int SUBMENU_WAR_PROGRESS = 2;
+    private static final int SUBMENU_US_VS_THEM = 3;
+    private static final int SUBMENU_STARS_LEFT = 4;
+    private static final int MENU_ADMIN = 5;
+    private static final int SUBMENU_UNLOCK_PLAYER = 6;
 
     // Create a broadcast receiver to get message and show on screen
     private final BroadcastReceiver mHandleMessageReceiver = new BroadcastReceiver() {
@@ -206,54 +216,38 @@ public class MainActivity extends Activity implements View.OnClickListener, Adap
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         super.onCreateOptionsMenu(menu);
-        CreateMenu(menu);
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.menu_main, menu);
         return true;
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        return MenuChoice(item);
-    }
 
-    private void CreateMenu(Menu menu) {
-        MenuItem mnu0 = menu.add(0, 0, 1, "Setup GCM");
-        {
-            mnu0.setIcon(R.drawable.ic_launcher);
-        }
-        MenuItem mnu1 = menu.add(0, 1, 2, "War Progress");
-        {
-            mnu1.setIcon(R.drawable.ic_launcher);
-        }
-        MenuItem mnu2 = menu.add(0, 2, 3, "Us VS Them");
-        {
-            mnu2.setIcon(R.drawable.ic_launcher);
-        }
-        MenuItem mnu3 = menu.add(0, 3, 4, "Stars Left");
-        {
-            mnu3.setIcon(R.drawable.ic_launcher);
-        }
-    }
-
-    private boolean MenuChoice(MenuItem item) {
-        switch (item.getItemId()) {
-            case 0:
+        switch (item.getItemId()){
+            case R.id.menuSetupGCM:
                 Intent setupGCMIntent = new Intent("android.intent.action.GCMRegisterActivity");
                 startActivity(setupGCMIntent);
                 return true;
-            case 1:
+            case R.id.submenu_warProgress:
                 Intent warProgressIntent = new Intent("android.intent.action.WarProgressActivity");
                 startActivity(warProgressIntent);
                 return true;
-            case 2:
+            case R.id.submenu_usVsThem:
                 Intent usVsThemIntent = new Intent("android.intent.action.UsVsThemActivity");
                 startActivity(usVsThemIntent);
                 return true;
-            case 3:
+            case R.id.submenu_starsLeft:
                 Intent StarsLeftIntent = new Intent("android.intent.action.StarsLeftToBeWinActivity");
                 startActivity(StarsLeftIntent);
                 return true;
+            case R.id.submenu_unlockAttack:
+                new UnlockAttack().execute();
+                return true;
+
+
         }
-        return false;
+        return super.onOptionsItemSelected(item);
     }
 
     @Override
@@ -643,6 +637,39 @@ public class MainActivity extends Activity implements View.OnClickListener, Adap
             } else {
                 Intent intent = new Intent("android.intent.action.SelectionActivity");
                 startActivity(intent);
+            }
+        }
+    }
+
+    private class UnlockAttack extends AsyncTask<Void, Void, Void> {
+        // Creating service handler class instance
+        ServiceHandler sh = new ServiceHandler();
+
+        @Override
+        protected Void doInBackground(Void... voids) {
+            // Making a request to url and getting response
+            List<NameValuePair> queryParams = new ArrayList<NameValuePair>();
+            queryParams.add(new BasicNameValuePair("selectedWarID", gs.getWarID().toString()));
+            sh.makeServiceCall(GlobalState.getInternetURL() + "unlockLockedAttack.php", ServiceHandler.POST, queryParams);
+            return null;
+        }
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            // Showing progress dialog
+            pIsPlayerAttacking = new ProgressDialog(MainActivity.this);
+            pIsPlayerAttacking.setMessage("Unlocking Attacks. Please wait...");
+            pIsPlayerAttacking.setCancelable(true);
+            pIsPlayerAttacking.show();
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            super.onPostExecute(aVoid);
+            // Dismiss the progress dialog
+            if (pIsPlayerAttacking.isShowing()) {
+                pIsPlayerAttacking.dismiss();
             }
         }
     }
